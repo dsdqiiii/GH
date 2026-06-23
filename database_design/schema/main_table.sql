@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS units (
     id uuid primary key default gen_random_uuid(),
     master_properties_id uuid not null references master_properties(id) on delete cascade,
     name text not null,
+    slug varchar(255) not null,
     base_price_per_night numeric(12,2) not null check (base_price_per_night >= 0),
     price_per_hour numeric(12,2) check (price_per_hour is null or price_per_hour >= 0),
     is_transit_enabled boolean not null default false,
@@ -37,7 +38,7 @@ CREATE TABLE IF NOT EXISTS galleries (
     reference_type varchar(20) not null check (reference_type in ('property', 'unit', 'organization')),
     reference_id uuid not null,
     url text not null,
-    is_hero boolean not null,
+    is_hero boolean not null default false,
     is_active boolean not null default true,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()

@@ -1,10 +1,10 @@
-INSERT INTO master_roles (code, name, description) VALUES 
-('ADMINISTRATOR', 'Administrator', 'Akses penuh ke semua konfigurasi sistem dan manajemen admin lainnya'),
-('MANAGER', 'Manager', 'Mengelola operasional guest house, booking, dan laporan harian'),
-('STAFF', 'Staff', 'Akses terbatas untuk operasional (seperti check-in/out tamu saja)'),
-('CUSTOMER', 'Customer', 'User terverifikasi yang bisa melakukan booking mandiri'),
-('GUEST', 'Guest', 'Tamu sementara tanpa akun permanen')
-('AFFILIATE', 'Afiliator', 'User terverifikasi yang terdaftar menjadi afiliator');
+INSERT INTO master_roles (id, code, name, description) VALUES 
+(0, 'SUPERADMIN', 'Super Admin', 'only system owner dan developer'),
+(1, 'ADMINISTRATOR', 'Administrator', 'Akses penuh ke semua konfigurasi sistem dan manajemen admin lainnya'),
+(2, 'MANAGER', 'Manager', 'Mengelola operasional guest house, booking, dan laporan harian'),
+(3, 'STAFF', 'Staff', 'Akses terbatas untuk operasional (seperti check-in/out tamu saja)'),
+(4, 'CUSTOMER', 'Customer', 'User terverifikasi yang bisa melakukan booking mandiri'),
+(5, 'AFFILIATE', 'Afiliator', 'User terverifikasi yang terdaftar menjadi afiliator');
 
 INSERT INTO master_facilities (name, code) VALUES 
 ('Parkir', 'PARK'),
@@ -27,10 +27,9 @@ INSERT INTO master_organizations (name, slug) VALUES
 ('Pondok Pesantren Darunnajah Jakarta', 'darunnajah-jakarta'),
 ('Pondok Pesantren Nurul Ilmi Darunnajah 14', 'nurul-ilmi-dn14');
 
-INSERT INTO master_properties (master_organizations_id, name, slug) VALUES
-('', 'Guest House Andalusia (Dalam)', 'gh-andalusia-dalam'),
-('', 'Guest House Andalusia 54', 'gh-andalusia-54'),
-('', 'Guest House Darunnajah 14', 'gh-nurul-ilmi-14');
+INSERT INTO master_properties (master_organizations_id, name, slug, address) VALUES
+('', 'Guest House Andalusia (Dalam)', 'gh-andalusia', 'Jl. Ulujami Raya No.86, RT.1/RW.7, Ulujami, Kec. Pesanggrahan, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12250'),
+('', 'Guest House Andalusia 54', 'gh-andalusia-54', 'Jl. Ulujami Raya No.86, RT.1/RW.7, Ulujami, Kec. Pesanggrahan, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12250')
 
 INSERT INTO master_bank_accounts (master_organizations_id, bank_name, account_number, account_holder) VALUES
 ('', 'Bank Muamalat', '123', 'Pesantren Darunnajah'),
