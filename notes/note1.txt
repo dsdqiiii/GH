@@ -1,0 +1,321 @@
+note #1
+
+1. Payment ≠ Order Status
+
+2. [Accepted]
+    ✓ Multi Unit
+    ✓ Multi Property
+    ✓ Multi Organization
+    ✓ Payment Gateway
+    ✓ Partial Cancellation
+    ✓ Refund
+
+3. [Deferred]
+    ✓ Multi Range
+
+4. rangkuman
+    MVP (Fase 0)
+    ✓ Single Organization
+    ✓ Multi Unit
+    ✓ Multi Property
+    ✓ Transfer Manual
+    ✓ 1 Payment per Order
+    Fase 1
+    ✓ Multi Organization
+    ✓ Rekening Pusat
+    Fase 2
+    ✓ Payment Gateway
+    ✓ Settlement
+    ✓ Refund
+    Deferred
+    ✓ Multi Range
+
+5. [Open Questions]
+    1. Apakah DP/Pelunasan akan didukung?
+    2. Apakah Add-on dapat ditambahkan setelah booking dibuat?
+    3. Apakah satu order dapat memiliki beberapa payment di masa depan?
+    4. Apakah cancellation dapat dilakukan per-item?
+    5. Bagaimana lifecycle status order setelah seluruh item checkout?
+
+6. [answer]
+    1. tidak, langsung lunas di awal. antisipasi dengan refund saja.
+    2. masuk future dekat? tapi kemungkinan tidak atau at least dibatasi hanya sampai checked-in. setelah itu, order biasa, mungkin beda service (future juga, ada kemungkinan beda table/db).
+    3. harusnya, tetap 1 payment. dalam artian, 1 pintu masuk (either manual atau pay gatewat). kalau beberapa payment artinya bisa refund (partial refund include), maka yes (future).
+    4. ini menarik. should be yes. or any alternate better? tell me.
+    5. pick - order - (?repeat) - checkout (avail? softlock) - payment (lock) - booked - cancel (partial?) - refund (reopen unit) - checked-in - fixed no cancel/refund
+
+note#2 
+
+1. [DECIDED]
+    Tidak ada DP.
+
+2. [DECIDED]
+    Booking Add-on:
+        dapat ditambah sampai sebelum CHECKED_IN.
+    Guest Service:
+        out of scope.
+        Future module.
+
+3. [DECIDED]
+    1 Order = 1 Payment
+    Future:
+        Refund disimpan sebagai transaction,
+        bukan payment baru.
+
+4. [DECIDED]
+    Partial Cancellation:
+        YES
+    Dilakukan pada level order_item.
+
+5. lifecycle
+    booking 
+        PENDING_PAYMENT
+        ↓
+        BOOKED
+        ↓
+        CHECKED_IN
+        ↓
+        CHECKED_OUT
+        ↓
+        COMPLETED
+    cancellation
+        PENDING_PAYMENT
+        ↓
+        EXPIRED
+        atau
+        PENDING_PAYMENT
+        ↓
+        EXPIRED
+
+NOTE #3
+
+    SUDAH FINAL
+        ✓ Payment ≠ Order Status
+        ✓ Multi Unit
+        ✓ Multi Property
+        ✓ Schema ready for Multi Organization
+        ✓ Schema ready for Payment Gateway
+        ✓ Schema ready for Partial Cancellation
+        ✓ Schema ready for Refund
+        ✓ Tidak ada DP
+        ✓ 1 Order = 1 Payment Intent
+        Refund dan adjustment akan dimodelkan
+        sebagai transaction terpisah,
+        bukan payment baru.
+        ✓ Add-on hanya dapat ditambahkan
+        sebelum CHECKED_IN
+        ✓ No Cancel setelah CHECKED_IN
+        ✓ No Refund setelah CHECKED_IN
+        (kecuali admin override)
+        ✓ Multi Range ditunda
+        Jika suatu hari diperlukan,
+        refactor domain order diperbolehkan.
+        Tidak perlu diakomodasi pada MVP.
+
+NOTE #4
+
+1. Financial Charge Concerns
+    ✓ Tax
+    ✓ Service Charge
+    ✓ Cleaning Fee
+    ✓ Platform Fee
+    ✓ Fee lain-lain
+    ✓ Currency fixed ke IDR. Multi-currency diperbolehkan refactor di masa depan.
+    ✓ Charge (Tax, Service Charge, Fee). harus berasal dari data/configuration, bukan hardcoded di source code.
+    ✓ Charge Configuration dan Charge Snapshot adalah dua konsep berbeda.
+    ✓ Nilai charge harus disnapshot saat booking dibuat.
+    ✓ Snapshot harus menyimpan:
+        - charge_name
+        - charge_type
+        - charge_value
+        - calculated_amount
+
+NOTE #5 Booking Database Design Principles
+
+1. Domain Separation
+    ✓ Order, Payment, dan Booking Item adalah entitas berbeda.
+    ✓ Payment ≠ Order Status.
+    ✓ Status booking tidak boleh bergantung pada status pembayaran.
+    ✓ Refund tidak boleh mengubah histori payment.
+
+2. Order Design
+    ✓ Order adalah container transaksi.
+    ✓ Order dapat memiliki banyak order_item.
+    ✓ Order tidak menyimpan property_id.
+    ✓ Order tidak menyimpan organization_id.
+    ✓ Relasi property dan organization diturunkan dari unit yang dibooking.
+    ✓ Schema harus tetap valid untuk Multi Property.
+    ✓ Schema harus tetap valid untuk Multi Organization.
+
+3. Booking Item Design
+    ✓ Unit yang dibooking disimpan pada level order_item.
+    ✓ Status operasional kamar disimpan pada level order_item.
+    ✓ Partial Cancellation dilakukan pada level order_item.
+    ✓ Check-In dan Check-Out dilakukan pada level order_item.
+    ✓ Order dapat berisi lebih dari satu unit.
+
+4. Payment Design
+    ✓ 1 Order = 1 Payment Intent.
+    ✓ Tidak ada DP.
+    ✓ Pelunasan dilakukan di awal.
+    ✓ Refund merupakan transaction terpisah.
+    ✓ Payment harus dapat mendukung:
+        - Transfer Manual
+        - Payment Gateway
+        - Settlement (future)
+    ✓ Tujuan pembayaran (rekening/payment destination) harus dapat disnapshot saat pembayaran dibuat.
+
+5. Pricing & Snapshot Design
+    ✓ Harga unit harus disnapshot saat booking dibuat.
+    ✓ Harga add-on harus disnapshot saat booking dibuat.
+    ✓ Charge harus disnapshot saat booking dibuat.
+    ✓ Perubahan master data tidak boleh mengubah histori booking lama.
+    ✓ Booking harus tetap dapat direkonstruksi walaupun:
+        - harga berubah
+        - add-on berubah
+        - tax berubah
+        - rekening berubah
+
+6. Charge Design
+    ✓ Tax berasal dari configuration.
+    ✓ Service Charge berasal dari configuration.
+    ✓ Fee berasal dari configuration.
+    ✓ Tidak ada charge yang hardcoded di source code.
+    ✓ Charge dapat berupa:
+        - percentage
+        - fixed amount
+
+7. Lifecycle Rules
+    ✓ PENDING_PAYMENT → BOOKED → CHECKED_IN → CHECKED_OUT → COMPLETED.
+    ✓ PENDING_PAYMENT → EXPIRED.
+    ✓ BOOKED → CANCELLED.
+    ✓ CHECKED_IN = tidak bisa cancel.
+    ✓ CHECKED_IN = tidak bisa refund.
+    ✓ Admin override diperbolehkan.
+
+8. Future Readiness
+    ✓ Multi Organization.
+    ✓ Payment Gateway.
+    ✓ Settlement.
+    ✓ Refund.
+    ✓ Partial Cancellation.
+    ✓ Add-on sebelum CHECKED_IN.
+
+9. Explicit Non Goals
+    ✗ DP / Cicilan.
+    ✗ Multi Currency.
+    ✗ Guest Service Module.
+    ✗ Multi Range Booking.
+10. Allowed Future Refactor
+    ✓ Multi Range Booking.
+    ✓ Multi Currency.
+    ✓ Loyalty Program.
+    ✓ Membership.
+    ✓ Corporate Booking.
+    ✓ Travel Agent Integration.
+
+note#6
+
+1. Availability Source of Truth
+    [CHOOSEN]
+        ✓ Availability berasal dari booking data, bukan status unit.
+        ✓ Unit dianggap unavailable apabila terdapat booking aktif yang overlap pada rentang waktu yang sama.
+        ✓ units tidak memiliki status:
+            AVAILABLE
+            BOOKED
+        ✓ units hanya menyimpan status operasional:
+            ACTIVE
+            INACTIVE
+            MAINTENANCE (future?)
+        Alasan:
+            Booking adalah data temporal.
+            Status unit adalah data master.
+            Keduanya tidak boleh dicampur.
+        ✓ Booking aktif adalah booking yang masih memblokir ketersediaan unit.
+        Minimal:
+            - PENDING_PAYMENT (soft lock)
+            - BOOKED
+            - CHECKED_IN
+        Tidak termasuk:
+            - EXPIRED
+            - CANCELLED
+            - CHECKED_OUT
+            - COMPLETED
+
+2. Customer Snapshot
+    [CHOOSEN]
+        ✓ Order adalah snapshot transaksi.
+        ✓ Informasi customer yang digunakan saat checkout harus disimpan pada order.
+        ✓ Perubahan profile user di masa depan tidak boleh mengubah histori booking.
+        ✓ Order tetap valid walaupun:
+            - user mengganti nama
+            - user mengganti nomor telepon
+            - user mengganti email
+            - akun user dihapus/nonaktif
+        ✓ Snapshot customer minimal mencakup:
+            - guest_name
+            - guest_phone
+            - guest_email
+
+3. Auditability
+    [CHOOSEN]
+        ✓ Aktivitas penting harus dapat ditelusuri.
+        Aktivitas minimum:
+            - Payment Verified
+            - Booking Cancelled
+            - Refund Approved
+            - Check-In
+            - Check-Out
+        ✓ Harus diketahui:
+            siapa
+            kapan
+            melakukan aksi tersebut.
+        ✓ MVP wajib menyimpan:
+            siapa dan kapan
+            untuk setiap aktivitas penting.
+        ✓ Audit detail per perubahan field
+            boleh ditunda.
+        ✓ Namun schema tidak boleh menghalangi audit trail di masa depan.
+
+4. Soft Delete Strategy
+    [CHOOSEN]
+        ✓ Historical data lebih penting daripada penghapusan data.
+        ✓ Master data menggunakan soft delete.
+        Cakupan:
+            - Organizations
+            - Properties
+            - Units
+            - Addons
+            - Facilities
+            - Bank Accounts
+        ✓ Data yang pernah dipakai transaksi tidak boleh hard delete.
+        ✓ is_active menjadi mekanisme utama untuk menonaktifkan data.
+        ✓ Data transaksi bersifat immutable.
+
+5. Financial Reconstruction
+    [CHOOSEN]
+        ✓ Booking lama harus dapat direkonstruksi secara identik kapan pun.
+        ✓ Perubahan master data tidak boleh mengubah histori transaksi.
+        ✓ Data yang wajib tersnapshot:
+            Customer
+            Unit Price
+            Addon Price
+            Charge/Fee
+            Payment Destination
+        ✓ Perhitungan total transaksi harus dapat diverifikasi ulang menggunakan data snapshot.
+
+note#7
+
+1. kesimpulan note#1 - note#6 
+    Domain
+        ✓ Sudah matang
+    Lifecycle
+        ✓ Sudah matang
+    Finance
+        ✓ Sudah matang
+    Availability
+        ✓ Sudah matang
+    Snapshot Strategy
+        ✓ Sudah matang
+    Audit Strategy
+        ✓ MVP-ready
