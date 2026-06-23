@@ -123,13 +123,13 @@ INSERT INTO master_facilities (name, code) VALUES
 ('Pemanas Air (Shower)', 'WHOT');
 
 INSERT INTO master_organizations (name, slug) VALUES
-('Pondok Pesantren Darunnajah Pusat', 'darunnajah-pusat'),
+('Pondok Pesantren Darunnajah Jakarta', 'darunnajah-jakarta'),
 ('Pondok Pesantren Nurul Ilmi Darunnajah 14', 'nurul-ilmi-dn14');
 
 INSERT INTO master_properties (master_organizations_id, name, slug) VALUES
-('', 'Guest House Andalusia', 'gh-andalusia'),
-('', 'Guest House Gedung 54', 'gh-gedung-54'),
-('', 'Guest House Darunnajah 14', 'gh-dn14');
+('', 'Guest House Andalusia (Dalam)', 'gh-andalusia-dalam'),
+('', 'Guest House Andalusia 54', 'gh-andalusia-54'),
+('', 'Guest House Darunnajah 14', 'gh-nurul-ilmi-14');
 
 INSERT INTO master_bank_accounts (master_organizations_id, bank_name, account_number, account_holder) VALUES
 ('', 'Bank Muamalat', '123', 'Pesantren Darunnajah'),
