@@ -161,7 +161,7 @@ NOTE #5 Booking Database Design Principles
     ✓ Refund merupakan transaction terpisah.
     ✓ Payment harus dapat mendukung:
         - Transfer Manual
-        - Payment Gateway
+        - Payment Gateway (future)
         - Settlement (future)
     ✓ Tujuan pembayaran (rekening/payment destination) harus dapat disnapshot saat pembayaran dibuat.
 
@@ -209,10 +209,10 @@ NOTE #5 Booking Database Design Principles
 10. Allowed Future Refactor
     ✓ Multi Range Booking.
     ✓ Multi Currency.
-    ✓ Loyalty Program.
-    ✓ Membership.
+    ✓ Loyalty Program.(future)
+    ✓ Membership.(future)
     ✓ Corporate Booking.
-    ✓ Travel Agent Integration.
+    ✓ Travel Agent Integration.(future)
 
 note#6
 

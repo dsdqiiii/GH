@@ -8,15 +8,9 @@ INSERT INTO master_roles (id, code, name, description) VALUES
 
 INSERT INTO master_facilities (name, code) VALUES 
 ('Parkir', 'PARK'),
-('Kolam Renang', 'SWIM'),
 ('Wi-Fi', 'WIFI'),
 ('AC', 'AC'),
 ('Smart TV', 'STV'),
-('Bathtub', 'BATHTUB'),
-('Sarapan', 'BFST'),
-('Dapur Bersama', 'KITCHEN'),
-('Ruang Meeting', 'MEETING'),
-('Aula', 'HALL'),
 ('Resepsionis 24 Jam', 'REC24'),
 ('Dispenser Air', 'WATER'),
 ('Sprei & Handuk', 'LINEN'),
@@ -24,22 +18,19 @@ INSERT INTO master_facilities (name, code) VALUES
 ('Pemanas Air (Shower)', 'WHOT');
 
 INSERT INTO master_organizations (name, slug) VALUES
-('Pondok Pesantren Darunnajah Jakarta', 'darunnajah-jakarta'),
-('Pondok Pesantren Nurul Ilmi Darunnajah 14', 'nurul-ilmi-dn14');
+('Pondok Pesantren Darunnajah Jakarta', 'darunnajah-jakarta');
+
 
 INSERT INTO master_properties (master_organizations_id, name, slug, address) VALUES
-('', 'Guest House Andalusia (Dalam)', 'gh-andalusia', 'Jl. Ulujami Raya No.86, RT.1/RW.7, Ulujami, Kec. Pesanggrahan, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12250'),
-('', 'Guest House Andalusia 54', 'gh-andalusia-54', 'Jl. Ulujami Raya No.86, RT.1/RW.7, Ulujami, Kec. Pesanggrahan, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12250')
+('902c462b-65dd-471c-a750-6ec2060cab8e', 'Guest House Andalusia', 'gh-andalusia', 'Jl. Ulujami Raya No.86, RT.1/RW.7, Ulujami, Kec. Pesanggrahan, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12250'),
+('902c462b-65dd-471c-a750-6ec2060cab8e', 'Guest House Andalusia 54', 'gh-andalusia-54', 'Jl. Ulujami Raya No.86, RT.1/RW.7, Ulujami, Kec. Pesanggrahan, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12250')
 
 INSERT INTO master_bank_accounts (master_organizations_id, bank_name, account_number, account_holder) VALUES
-('', 'Bank Muamalat', '123', 'Pesantren Darunnajah'),
-('', 'Bank BSI', '456', 'Pesantren Darunnajah'),
-('', 'Bank Muamalat', '789', 'Pesantren Nurul Ilmi');
+('902c462b-65dd-471c-a750-6ec2060cab8e', 'Bank Muamalat', '123', 'Pesantren Darunnajah');
 
 INSERT INTO master_addons (code, name, description, pricing_unit) 
 VALUES
-  ('BREAKFAST', 'Buffet Breakfast', 'Sarapan prasmanan harian di restoran utama hotel.', 'per_guest_per_night'),
   ('EXTRA_BED', 'Extra Bed', 'Tambahan satu kasur tipe single di dalam kamar.', 'per_night'),
   ('LATE_CHECKOUT', 'Late Checkout', 'Kelonggaran waktu checkout hingga pukul 16:00 waktu setempat.', 'flat'),
-  ('EARLY_CHECKIN', 'Early Check-in', 'Fasilitas masuk kamar lebih awal mulai dari pukul 10:00 pagi.', 'flat'),
-  ('AIRPORT_PICKUP', 'Airport Pick-up', 'Layanan jemputan satu arah dari bandara menuju hotel.', 'flat');
+  ('EARLY_CHECKIN', 'Early Check-in', 'Fasilitas masuk kamar lebih awal mulai dari pukul 10:00 pagi.', 'flat');
+  

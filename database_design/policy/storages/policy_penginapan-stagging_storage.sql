@@ -1,10 +1,1 @@
-DROP POLICY "Give public access to images in folder okddj4_0" ON storage.objects;
-
-CREATE POLICY "Give public access to images in folder okddj4_0" 
-ON storage.objects 
-FOR SELECT 
-TO public 
-USING (
-  bucket_id = 'penginapan-stagging' 
-  AND LOWER((storage.foldername(name))[1]) = 'public'
-);
+CREATE POLICY "Give anon users access to JPG images in folder 1r5_0" ON storage.objects FOR SELECT TO public USING (bucket_id = 'GH' AND storage."extension"(name) = 'jpg' AND LOWER((storage.foldername(name))[1]) = 'public' AND auth.role() = 'anon');

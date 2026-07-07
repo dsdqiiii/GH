@@ -1,0 +1,18 @@
+Pembayaran manual, tetapi kalau diajukan payment gateway tidak perlu dirombak.
+
+Daftar foto
+Andalusia 54
+
+lorong 54= 'public/GH54/02_lorong_kaligrafi.jpeg'
+foto gedung= 'public/GH54/04_gedung_andalusia.jpeg'
+kamar standard= 'public/GH54/kamar_standard.jpeg'
+kamar VIP= 'public/GH54/kamar_vip.jpeg'
+lorong kamar= 'public/GH54/lorong.jpeg'
+toilet= 'public/GH54/Toilet.jpeg'
+
+Andalusia Dalam
+Tampak depan andalus dalam= 'public/GHDALAM/03-lorong_kamar.jpeg'
+Kamar Standard= 'public/GHDALAM/kamar_standard.jpeg'
+
+
+
