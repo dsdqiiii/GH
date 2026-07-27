@@ -134,10 +134,13 @@ INSERT INTO galleries (reference_type, reference_id, url, is_hero) VALUES
 -- ======================
 -- PROPERTY ADDONS INSERT
 -- ======================
-
 INSERT INTO property_addons (master_properties_id, addon_id, price) VALUES
+-- Property 1
+('e225567b-8278-4b82-9abe-051dbd5d3359', 1, 30000.00), -- Extra Bed
+('e225567b-8278-4b82-9abe-051dbd5d3359', 2, 25000.00),  -- Late Checkout
+('e225567b-8278-4b82-9abe-051dbd5d3359', 3, 25000.00),  -- Early Check-in
 
--- add on 2 EXTRA BED --
-('', 2, 30000),
--- add on 2 EXTRA BED --
-('', 2, 30000),
+-- Property 2
+('b779d9eb-04e9-4b4e-8874-5be67c98abd7', 1, 30000.00), -- Extra Bed
+('b779d9eb-04e9-4b4e-8874-5be67c98abd7', 2, 25000.00),  -- Late Checkout
+('b779d9eb-04e9-4b4e-8874-5be67c98abd7', 3, 25000.00);  -- Early Check-in

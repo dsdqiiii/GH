@@ -1,7 +1,7 @@
 // packages/supabase/src/server.ts
 
 import { createServerClient } from "@supabase/ssr";
-import type { Database } from "./supabase";
+import type { Database } from "../types/supabase";
 
 export async function createSupabaseServer() {
   // Gunakan dynamic import untuk cookies agar tidak error di Pages Router

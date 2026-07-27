@@ -1,26 +1,14 @@
-import { createSupabaseServer } from "@/lib/supabase/server";
-import { getProperties } from "@/services/property";
 import FeaturedGuesthouses from "@/components/landing/FeaturedGuestHouse";
 
-export default async function GuestHousePage() {
-
-  const supabase = await createSupabaseServer();
-  const {data, error} = await supabase
-    .from('master_properties')
-    .select('*');   
-  if (error) {
-    
-  }
-  
-  
-  const property = await getProperties();
-  
-
+export default function GuestHousePage() {
   return (
-    <main>
-        <div className='bg-white max-w-full h-screen text-black'>
-            <FeaturedGuesthouses />
-        </div>
+    <main
+      className="min-h-screen"
+      style={{
+        backgroundColor: "#EDE6D6",
+      }}
+    >
+      <FeaturedGuesthouses />
     </main>
-  )
+  );
 }

@@ -811,7 +811,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_available_units: {
+        Args: {
+          p_check_in: string
+          p_check_out: string
+          p_property_id: string
+          p_type_booking?: string
+        }
+        Returns: {
+          base_price_per_night: number
+          capacity: number
+          descriptions: string
+          floor: string
+          id: string
+          is_active: boolean
+          is_transit_enabled: boolean
+          master_properties_id: string
+          name: string
+          price_per_hour: number
+          slug: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
