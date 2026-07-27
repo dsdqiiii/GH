@@ -9,7 +9,11 @@ const images = [
   "/images/gh/gh2/rgh2.jpeg"
 ];
 
-export default function Hero() {
+interface HeroProps {
+  images: string[];
+};
+
+export default function Hero({images}: HeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -53,7 +57,7 @@ export default function Hero() {
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
           <a
             href="/guesthouse"
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm sm:text-base"
+            className="px-6 py-3 bg-white text-black rounded-lg hover:bg-blue-700 transition text-sm sm:text-base"
           >
             Lihat Guesthouse
           </a>

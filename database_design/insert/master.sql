@@ -15,7 +15,8 @@ INSERT INTO master_facilities (name, code) VALUES
 ('Dispenser Air', 'WATER'),
 ('Sprei & Handuk', 'LINEN'),
 ('Peralatan Mandi', 'TOILETRIES'),
-('Pemanas Air (Shower)', 'WHOT');
+('Pemanas Air (Shower)', 'WHOT'),
+('Ruang Meeting', 'MEET');
 
 INSERT INTO master_organizations (name, slug) VALUES
 ('Pondok Pesantren Darunnajah Jakarta', 'darunnajah-jakarta');
