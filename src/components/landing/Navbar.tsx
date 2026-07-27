@@ -40,10 +40,10 @@ export default function Navbar({ transparent = false }) {
 
         {/* === DESKTOP MENU === */}
         <div className="hidden md:flex space-x-6 font-medium items-center">
-          <Link href="/about" className="hover:opacity-70 transition">
+          <Link href="/tentang" className="hover:opacity-70 transition">
             About Us
           </Link>
-          <Link href="/contact" className="hover:opacity-70 transition">
+          <Link href="/kontak" className="hover:opacity-70 transition">
             Contact Us
           </Link>
         </div>
@@ -65,10 +65,10 @@ export default function Navbar({ transparent = false }) {
             }
           `}
         >
-          <Link href="/about" onClick={() => setOpen(false)} className="block">
+          <Link href="/tentang" onClick={() => setOpen(false)} className="block">
             About Us
           </Link>
-          <Link href="/contact" onClick={() => setOpen(false)} className="block">
+          <Link href="/kontak" onClick={() => setOpen(false)} className="block">
             Contact Us
           </Link>
         </div>
