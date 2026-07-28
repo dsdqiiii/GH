@@ -1,14 +1,10 @@
+import { PageShell } from "@/components/ui/layout/PageShell";
 import FeaturedGuesthouses from "@/components/landing/FeaturedGuestHouse";
 
 export default function GuestHousePage() {
   return (
-    <main
-      className="min-h-screen"
-      style={{
-        backgroundColor: "#EDE6D6",
-      }}
-    >
+    <PageShell>
       <FeaturedGuesthouses />
-    </main>
+    </PageShell>
   );
 }

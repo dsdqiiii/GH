@@ -19,7 +19,8 @@ returns table (
 )
 language sql
 stable
-security invoker
+security definer
+set search_path = public
 as $$
   select
     u.id,
@@ -76,3 +77,6 @@ as $$
     );
 
 $$;
+
+revoke execute on function public.get_available_units from public;
+grant execute on function public.get_available_units to anon, authenticated;

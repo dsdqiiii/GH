@@ -2,7 +2,6 @@ import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
 import JoinSection from "@/components/landing/JoinSection";
 import Footer from "@/components/landing/Footer";
-import FeaturedGuesthouses from "@/components/landing/FeaturedGuestHouse";
 
 import { getHeroImages } from "@/services/hero-images";
 

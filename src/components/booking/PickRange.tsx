@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { FLOOR } from "@/lib/constants/floor";
+import { Button } from "@/components/ui/core/button";
 
 const ALL_FLOOR = "Semua Lantai";
 type FloorOption = typeof ALL_FLOOR | (typeof FLOOR)[number];
@@ -16,32 +17,23 @@ interface PickRangeProps {
   }) => void;
 }
 
-/**
- * PickRange
- * Dummy component untuk pencarian range tanggal (check-in/check-out) + jumlah tamu (adult) + filter lantai.
- * Belum ada validasi availability nyata — hanya mengelola state form & sinkronisasi ke URL query params.
- *
- * TODO (next iteration):
- * - Ganti native <input type="date"> dengan custom calendar (biar bisa highlight tanggal penuh/booked)
- * - Disable tanggal yang sudah lewat (min = today)
- * - Loading state saat submit (menunggu hasil filter unit)
- */
 export default function PickRange({ onSearch }: PickRangeProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   const [checkin, setCheckin] = useState(searchParams.get("checkin") ?? "");
   const [checkout, setCheckout] = useState(searchParams.get("checkout") ?? "");
   const [adult, setAdult] = useState(
-    Number(searchParams.get("adult")) || 2 // default 2 pax
+    Number(searchParams.get("adult")) || 2
   );
   const [floor, setFloor] = useState<FloorOption>(
     (searchParams.get("floor") as FloorOption) ?? ALL_FLOOR
   );
   const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
 
@@ -55,12 +47,11 @@ export default function PickRange({ onSearch }: PickRangeProps) {
       return;
     }
 
-    if (adult < 1) {
+    if (!Number.isFinite(adult) || adult < 1) {
       setError("Jumlah tamu minimal 1");
       return;
     }
 
-    // Sinkronisasi ke URL query params
     const params = new URLSearchParams(searchParams.toString());
     params.set("checkin", checkin);
     params.set("checkout", checkout);
@@ -71,34 +62,21 @@ export default function PickRange({ onSearch }: PickRangeProps) {
       params.set("floor", floor);
     }
 
-    router.push(`${pathname}?${params.toString()}`);
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`);
+    });
 
-    // Callback opsional, kalau parent mau handle langsung tanpa reload dari URL
     onSearch?.({ checkin, checkout, adult, floor });
   }
 
   const today = new Date().toISOString().split("T")[0];
 
   const inputClass =
-    "rounded-lg px-3 py-2 text-sm border outline-none transition-colors focus:ring-2 focus:ring-offset-0";
-
-  const fieldStyle = {
-    borderColor: "#CFC2B2",
-    color: "#2C2420",
-    backgroundColor: "#FFFFFF",
-    "--tw-ring-color": "#B5654A",
-  } as React.CSSProperties;
+    "rounded-lg px-3 py-2 text-sm border border-sand text-ink bg-white outline-none transition-colors focus:ring-2 focus:ring-terracotta focus:ring-offset-0";
 
   return (
-    <div
-      className="rounded-xl p-4"
-      style={{
-        backgroundColor: "#FBF9F4",
-        border: "1px solid #CFC2B2",
-        boxShadow: "0 2px 12px rgba(31,59,54,0.08)",
-      }}
-    >
-      <h2 className="text-base font-semibold mb-3" style={{ color: "#1F3B36" }}>
+    <div className="rounded-xl p-4 bg-surface border border-sand shadow-[0_2px_12px_rgba(31,59,54,0.08)]">
+      <h2 className="text-base font-semibold mb-3 text-forest">
         Cari range yang tersedia dulu, yuk!
       </h2>
 
@@ -107,11 +85,7 @@ export default function PickRange({ onSearch }: PickRangeProps) {
         className="relative flex flex-col md:flex-row gap-3 md:items-end"
       >
         <div className="flex flex-col gap-1 flex-1">
-          <label
-            htmlFor="checkin"
-            className="text-xs font-medium"
-            style={{ color: "#6B5D4F" }}
-          >
+          <label htmlFor="checkin" className="text-xs font-medium text-taupe">
             Check-in
           </label>
           <input
@@ -121,16 +95,11 @@ export default function PickRange({ onSearch }: PickRangeProps) {
             value={checkin}
             onChange={(e) => setCheckin(e.target.value)}
             className={inputClass}
-            style={fieldStyle}
           />
         </div>
 
         <div className="flex flex-col gap-1 flex-1">
-          <label
-            htmlFor="checkout"
-            className="text-xs font-medium"
-            style={{ color: "#6B5D4F" }}
-          >
+          <label htmlFor="checkout" className="text-xs font-medium text-taupe">
             Check-out
           </label>
           <input
@@ -140,36 +109,25 @@ export default function PickRange({ onSearch }: PickRangeProps) {
             value={checkout}
             onChange={(e) => setCheckout(e.target.value)}
             className={inputClass}
-            style={fieldStyle}
           />
         </div>
 
         <div className="flex flex-col gap-1 w-full md:w-32">
-          <label
-            htmlFor="adult"
-            className="text-xs font-medium"
-            style={{ color: "#6B5D4F" }}
-          >
+          <label htmlFor="adult" className="text-xs font-medium text-taupe">
             Tamu (dewasa)
           </label>
           <input
             id="adult"
             type="number"
             min={1}
-            value={adult}
+            value={Number.isFinite(adult) ? adult : ""}
             onChange={(e) => setAdult(Number(e.target.value))}
             className={inputClass}
-            style={fieldStyle}
           />
         </div>
 
-        {/* Filter lantai — opsi ALL + daftar lantai dari constants */}
         <div className="flex flex-col gap-1 w-full md:w-36">
-          <label
-            htmlFor="floor"
-            className="text-xs font-medium"
-            style={{ color: "#6B5D4F" }}
-          >
+          <label htmlFor="floor" className="text-xs font-medium text-taupe">
             Lantai
           </label>
           <select
@@ -177,7 +135,6 @@ export default function PickRange({ onSearch }: PickRangeProps) {
             value={floor}
             onChange={(e) => setFloor(e.target.value as FloorOption)}
             className={inputClass}
-            style={fieldStyle}
           >
             <option value={ALL_FLOOR}>{ALL_FLOOR}</option>
             {FLOOR.map((opt) => (
@@ -188,25 +145,12 @@ export default function PickRange({ onSearch }: PickRangeProps) {
           </select>
         </div>
 
-        <button
-          type="submit"
-          className="text-sm font-medium px-5 py-2 rounded-lg transition-colors"
-          style={{ backgroundColor: "#B5654A", color: "#FBF9F4" }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = "#9C5540")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = "#B5654A")
-          }
-        >
+        <Button type="submit" variant="brand" isLoading={isPending} className="px-5 py-2 text-sm">
           Cari Kamar
-        </button>
+        </Button>
 
         {error && (
-          <p
-            className="text-xs md:absolute md:-bottom-6"
-            style={{ color: "#B5654A" }}
-          >
+          <p className="text-xs md:absolute md:-bottom-6 text-terracotta">
             {error}
           </p>
         )}

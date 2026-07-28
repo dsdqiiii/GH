@@ -1,34 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-const images = [
-  "/images/gh/gh1/gh1.jpeg",
-  "/images/gh/gh2/gh2.jpeg",
-  "/images/gh/gh1/rgh1.jpeg",
-  "/images/gh/gh2/rgh2.jpeg"
-];
+import { Button } from "@/components/ui/core/button";
 
 interface HeroProps {
   images: string[];
-};
+}
 
-export default function Hero({images}: HeroProps) {
+export default function Hero({ images }: HeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prev) =>
-        prev === images.length - 1 ? 0 : prev + 1
-      );
+      setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [images.length]);
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
-
-      {/* Slide wrapper */}
       <div className="absolute inset-0">
         {images.map((img, i) => (
           <div
@@ -41,13 +31,11 @@ export default function Hero({images}: HeroProps) {
         ))}
       </div>
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/40"></div>
+      <div className="absolute inset-0 bg-black/40" />
 
-      {/* Content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-6">
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg leading-tight">
-          Guest House Andalusia 
+          Guest House Andalusia
         </h1>
 
         <p className="text-base sm:text-lg md:text-xl mb-8 drop-shadow-lg max-w-2xl">
@@ -55,15 +43,11 @@ export default function Hero({images}: HeroProps) {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-          <a
-            href="/guesthouse"
-            className="px-6 py-3 bg-white text-black rounded-lg hover:bg-blue-700 transition text-sm sm:text-base"
-          >
+          <Button href="/guesthouse" variant="brand" className="text-sm sm:text-base">
             Lihat Guesthouse
-          </a>
+          </Button>
         </div>
       </div>
-
     </section>
   );
 }
