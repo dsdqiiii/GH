@@ -1,12 +1,7 @@
 import type { PropertyMasterAddons } from "@/lib/types/main";
-import type { FormState, FormErrors } from "@/lib/types/booking.types";
+import type { FormState, FormErrors, BookingType } from "@/lib/types/booking.types";
 
 export const initialBookingState: FormState = {
-  bookingType: "inap",
-  checkInDate: null,
-  checkOutDate: null,
-  transitDate: null,
-  hours: 3,
   totalGuest: 1,
   guestName: "",
   guestPhone: "",
@@ -15,31 +10,30 @@ export const initialBookingState: FormState = {
 };
 
 // Hitung jumlah malam dari checkIn dan checkOut
-export function calculateNights(checkIn: Date | null, checkOut: Date | null): number {
-  if (!checkIn || !checkOut) return 0;
+export function calculateNights(checkIn: Date, checkOut: Date): number {
   const diffTime = checkOut.getTime() - checkIn.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   return Math.max(0, diffDays);
 }
 
 export function calculateRoomSubtotal(
-  form: FormState,
+  bookingType: BookingType,
+  nights: number,
+  durationHours: number,
   pricePerNight: number,
   pricePerHour: number | null
 ): number {
-  if (form.bookingType === "inap") {
-    const nights = calculateNights(form.checkInDate, form.checkOutDate);
+  if (bookingType === "inap") {
     return nights * pricePerNight;
   }
-  return form.hours * (pricePerHour ?? 0);
+  return durationHours * (pricePerHour ?? 0);
 }
 
 export function calculateAddonSubtotal(
   form: FormState,
-  addons: PropertyMasterAddons[]
+  addons: PropertyMasterAddons[],
+  nights: number
 ): number {
-  const nights = calculateNights(form.checkInDate, form.checkOutDate);
-
   return addons.reduce((total, addon) => {
     const qty = form.selectedAddons[addon.id];
     if (!qty) return total;
@@ -64,21 +58,6 @@ export function validateBookingForm(
 ): FormErrors {
   const errors: FormErrors = {};
 
-  if (form.bookingType === "inap") {
-    if (!form.checkInDate || !form.checkOutDate) {
-      errors.dates = "Pilih tanggal Check-in dan Check-out";
-    }
-  }
-
-  if (form.bookingType === "transit") {
-    if (!form.transitDate) {
-      errors.dates = "Pilih tanggal transit";
-    }
-    if (form.hours < 1) {
-      errors.dates = "Durasi minimal 1 jam";
-    }
-  }
-
   if (form.totalGuest < 1) {
     errors.totalGuest = "Jumlah tamu minimal 1";
   }
@@ -102,7 +81,8 @@ export function validateBookingForm(
   return errors;
 }
 
-// Format Date ke string "YYYY-MM-DD"
+// Format Date ke string "YYYY-MM-DD" — sudah tidak dipakai BookingForm,
+// dipertahankan untuk kemungkinan reuse (mis. admin calendar)
 export function formatDateKey(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");

@@ -10,16 +10,14 @@ export interface BookingFormProps {
   isTransitEnabled: boolean;
   addons: PropertyMasterAddons[];
   isLoggedIn?: boolean;
-  // Tanggal yang sudah di-book (Format: "YYYY-MM-DD")
   bookedDates?: string[];
+
+  checkIn: string;
+  checkOut: string;
+  bookingType: BookingType;
 }
 
 export interface FormState {
-  bookingType: BookingType;
-  checkInDate: Date | null;
-  checkOutDate: Date | null;
-  transitDate: Date | null;
-  hours: number;
   totalGuest: number;
   guestName: string;
   guestPhone: string;
@@ -28,7 +26,6 @@ export interface FormState {
 }
 
 export interface FormErrors {
-  dates?: string;
   totalGuest?: string;
   guestName?: string;
   guestPhone?: string;

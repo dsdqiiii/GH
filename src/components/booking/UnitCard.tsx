@@ -10,13 +10,31 @@ export interface UnitCardData {
   base_price_per_night: number | string | null;
 }
 
+interface SearchQuery {
+  checkin?: string;
+  checkout?: string;
+  adult?: string;
+  floor?: string;
+  type?: string;
+}
+
 interface UnitCardProps {
   propertySlug: string;
   unit: UnitCardData;
+  searchQuery?: SearchQuery;
 }
 
-export default function UnitCard({ propertySlug, unit }: UnitCardProps) {
+export default function UnitCard({ propertySlug, unit, searchQuery }: UnitCardProps) {
   const price = Number(unit.base_price_per_night ?? 0);
+
+  const query = new URLSearchParams();
+  if (searchQuery?.checkin) query.set("checkin", searchQuery.checkin);
+  if (searchQuery?.checkout) query.set("checkout", searchQuery.checkout);
+  if (searchQuery?.adult) query.set("adult", searchQuery.adult);
+  if (searchQuery?.type) query.set("type", searchQuery.type);
+
+  const queryString = query.toString();
+  const href = `/guesthouse/${propertySlug}/${unit.slug}${queryString ? `?${queryString}` : ""}`;
 
   return (
     <div className="rounded-2xl border border-sand bg-surface p-6">
@@ -38,7 +56,7 @@ export default function UnitCard({ propertySlug, unit }: UnitCardProps) {
           </p>
           <p className="mb-4 text-sm text-taupe">/ malam</p>
 
-          <Link href={`/guesthouse/${propertySlug}/${unit.slug}`}>
+          <Link href={href}>
             <Button variant="brand" className="w-full lg:w-auto px-8">
               Pilih Kamar
             </Button>

@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/core/card";
 import { Badge } from "@/components/ui/core/badge";
 
 import { getUnitsByPropertyId } from "@/services/unit";
-import { getAvailableUnits } from "@/services/availablility";
+import { getAvailableUnits, type TypeBooking } from "@/services/availablility";
 import { getPropertyBySlug } from "@/services/property";
 import { getPropertyImagesByPropertyId } from "@/services/images";
 import { getPropertyFacilities } from "@/services/facility";
@@ -25,6 +25,7 @@ export default async function PropertiPage({
     checkout?: string;
     adult?: string;
     floor?: string;
+    type?: TypeBooking;
   }>;
 }) {
   const { slug } = await params;
@@ -44,13 +45,13 @@ export default async function PropertiPage({
           propertyId: property.id,
           checkIn: sp.checkin!,
           checkOut: sp.checkout!,
+          typeBooking: sp.type ?? "inap",
         })
       : getUnitsByPropertyId(property.id),
     getPropertyImagesByPropertyId(property.id),
     getPropertyFacilities(property.id),
   ]);
 
-  // Filter lantai dilakukan di server (JS), bukan level RPC
   const units = sp.floor
     ? rawUnits.filter((unit) => unit.floor === sp.floor)
     : rawUnits;
@@ -124,7 +125,11 @@ export default async function PropertiPage({
         <h2 className="text-3xl font-semibold mb-8 text-forest">
           {hasDateFilter ? "Kamar Tersedia" : "Pilihan Kamar"}
         </h2>
-        <UnitList propertySlug={property.slug} units={units} />
+        <UnitList
+          propertySlug={property.slug}
+          units={units}
+          searchQuery={hasDateFilter ? sp : undefined}
+        />
       </section>
     </PageShell>
   );
