@@ -27,7 +27,7 @@ export async function getAvailableUnits({
   });
 
   if (error) {
-    console.error("getAvailableUnits error:", error);
+    
     return [];
   }
 

@@ -79,7 +79,7 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
-          is_hero: boolean
+          is_main: boolean
           reference_id: string
           reference_type: string
           updated_at: string
@@ -89,7 +89,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
-          is_hero?: boolean
+          is_main?: boolean
           reference_id: string
           reference_type: string
           updated_at?: string
@@ -99,7 +99,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
-          is_hero?: boolean
+          is_main?: boolean
           reference_id?: string
           reference_type?: string
           updated_at?: string
@@ -811,6 +811,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_booking: {
+        Args: {
+          p_addons?: Json
+          p_booking_type: string
+          p_check_in: string
+          p_check_out: string
+          p_guest_email?: string
+          p_guest_name?: string
+          p_guest_phone?: string
+          p_total_guest: number
+          p_unit_id: string
+          p_user_id?: string
+        }
+        Returns: {
+          booking_code: string
+          order_id: string
+          total_amount: number
+        }[]
+      }
+      generate_booking_code: { Args: never; Returns: string }
       get_available_units: {
         Args: {
           p_check_in: string

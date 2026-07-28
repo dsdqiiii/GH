@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/core/button";
 
 interface HeroProps {
@@ -21,12 +22,17 @@ export default function Hero({ images }: HeroProps) {
     <section className="relative h-screen w-full overflow-hidden">
       <div className="absolute inset-0">
         {images.map((img, i) => (
-          <div
-            key={i}
-            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-[1200ms]
-              ${i === currentIndex ? "opacity-100" : "opacity-0"}
-            `}
-            style={{ backgroundImage: `url(${img})` }}
+          <Image
+            key={img}
+            src={img}
+            alt="Guest House Andalusia"
+            fill
+            priority={i === 0}
+            loading={i === 0 ? undefined : "lazy"}
+            sizes="100vw"
+            className={`object-cover transition-opacity duration-[1200ms] ${
+              i === currentIndex ? "opacity-100" : "opacity-0"
+            }`}
           />
         ))}
       </div>

@@ -31,3 +31,24 @@ export interface FormErrors {
   guestPhone?: string;
   guestEmail?: string;
 }
+
+export interface BookingPayloadAddon {
+  propertyAddonId: string;
+  quantity: number;
+}
+
+export interface BookingGuest {
+  name: string;
+  phone: string;
+  email: string | null;
+}
+
+export interface BookingPayload {
+  unitId: string;
+  bookingType: BookingType;
+  checkIn: string;
+  checkOut: string;
+  totalGuest: number;
+  guest: BookingGuest | null;
+  addons: BookingPayloadAddon[];
+}

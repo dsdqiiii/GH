@@ -5,14 +5,14 @@ import { PageHeader } from "@/components/ui/layout/PageHeader";
 import { Card } from "@/components/ui/core/card";
 
 import { getProperties } from "@/services/property";
-import { getPropertyImagesByPropertyId } from "@/services/images";
+import { getMainImagesByPropertyId } from "@/services/images";
 
 export default async function FeaturedGuesthouses() {
   const properties = await getProperties();
 
   const propertiesWithImages = await Promise.all(
     properties.map(async (property) => {
-      const images = await getPropertyImagesByPropertyId(property.id);
+      const images = await getMainImagesByPropertyId(property.id);
 
       return {
         ...property,

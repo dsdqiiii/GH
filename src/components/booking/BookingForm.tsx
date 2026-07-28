@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/core/button";
 import PickRange from "./PickRange";
-import type { BookingFormProps, FormState, FormErrors } from "@/lib/types/booking.types";
+import type { BookingFormProps, FormState, FormErrors, BookingPayload } from "@/lib/types/booking.types";
 import {
   initialBookingState,
   calculateNights,
@@ -11,6 +11,7 @@ import {
   calculateAddonSubtotal,
   validateBookingForm,
 } from "@/utils/booking.utils";
+import { createBooking } from "@/actions/bookings";
 
 function formatDateDisplay(iso: string) {
   return new Date(iso).toLocaleString("id-ID", {
@@ -72,7 +73,7 @@ export default function BookingForm({
 
     setIsSubmitting(true);
 
-    const payload = {
+    const payload: BookingPayload = {
       unitId,
       bookingType,
       checkIn,
@@ -91,11 +92,11 @@ export default function BookingForm({
           quantity,
         })
       ),
-      subtotal: { room: roomSubtotal, addons: addonSubtotal },
-      total,
     };
 
-    console.log("Booking payload:", payload);
+    const userId = undefined;
+
+    const result = await createBooking(payload, userId);
     await new Promise((resolve) => setTimeout(resolve, 800));
     setIsSubmitting(false);
   }

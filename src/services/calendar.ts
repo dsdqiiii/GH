@@ -30,7 +30,7 @@ export async function getCalendarAvailability(
     .gt("check_out", startOfMonth);
 
   if (error || !data) {
-    console.error("Error fetching calendar availability:", error);
+    
     return [];
   }
 

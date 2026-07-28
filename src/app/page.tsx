@@ -3,7 +3,7 @@ import Hero from "@/components/landing/Hero";
 import JoinSection from "@/components/landing/JoinSection";
 import Footer from "@/components/landing/Footer";
 
-import { getHeroImages } from "@/services/hero-images";
+import { getHeroImages } from "@/services/images";
 
 export default async function HomePage() {
   const heroImages = (await getHeroImages()).map(

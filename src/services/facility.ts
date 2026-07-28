@@ -5,17 +5,13 @@ export async function getPropertyFacilities(
   propertyId: string
 ): Promise<MasterFacility[]> {
   const supabase = await createSupabaseServer();
-console.log('id', propertyId)
+
   const { data: assignments, error: assignmentError } = await supabase
     .from("facility_assignments")
     .select("facility_id")
     .eq("reference_type", "property")
     .eq("reference_id", propertyId);
 
-console.log({
-  assignments,
-  assignmentError,
-});
   if (assignmentError || !assignments || assignments.length === 0) return [];
     
   const facilityIds = assignments.map((row) => row.facility_id);
