@@ -1,6 +1,3 @@
--- =========================================================================
--- 4. LAYER TRANSAKSI OPERASIONAL & SNAPSHOT FINANSIAL (Marketplace Ready)
--- =========================================================================
 
 CREATE TABLE IF NOT EXISTS orders (
     id uuid primary key default gen_random_uuid(),
@@ -9,7 +6,8 @@ CREATE TABLE IF NOT EXISTS orders (
     guest_name varchar(255),
     guest_phone varchar(20),
     guest_email text,
-    status text not null default 'PENDING_PAYMENT' check (status in ('PENDING_PAYMENT', 'BOOKED', 'CHECKED_IN', 'CHECKED_OUT', 'COMPLETED', 'CANCELLED', 'EXPIRED')),
+    status text not null default 'PENDING_PAYMENT'
+        check (status in ('PENDING_PAYMENT', 'BOOKED', 'COMPLETED', 'CANCELLED', 'EXPIRED')),
     total_amount numeric(12,2) not null check (total_amount >= 0),
     total_guest smallint not null check (total_guest > 0),
     expires_at timestamptz not null,
@@ -24,7 +22,8 @@ CREATE TABLE IF NOT EXISTS order_items (
     unit_id uuid not null references units(id) on delete restrict,
     type_booking text not null check (type_booking in ('inap', 'transit')),
     guest_amount smallint not null check (guest_amount > 0),
-    status_item text not null default 'PENDING' check (status_item in ('PENDING', 'CONFIRMED', 'CHECKED_IN', 'CHECKED_OUT', 'CANCELLED')),
+    status_item text not null default 'PENDING'
+        check (status_item in ('PENDING', 'CONFIRMED', 'CHECKED_IN', 'CHECKED_OUT', 'CANCELLED', 'EXPIRED')),
     check_in timestamptz not null,
     check_out timestamptz not null,
     price_at_booking numeric(12,2) not null check (price_at_booking >= 0),
@@ -65,7 +64,7 @@ CREATE TABLE IF NOT EXISTS payments (
     order_id uuid not null unique references orders(id) on delete cascade,
     amount numeric(12,2) not null check (amount >= 0),
     proof_url text, 
-    status text not null default 'PENDING' check (status in ('PENDING', 'SUBMITTED', 'VERIFIED', 'REJECTED')),
+    status text not null default 'SUBMITTED' check (status in ('PENDING', 'SUBMITTED', 'VERIFIED', 'REJECTED')),
     destination_bank_name varchar(100) not null,
     destination_account_number varchar(50) not null,
     destination_account_holder varchar(255) not null,

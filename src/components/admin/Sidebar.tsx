@@ -2,97 +2,64 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  CalendarCheck,
+  Wallet,
+  FileBarChart,
+  Boxes,
+  Users,
+  Building2,
+} from "lucide-react";
 
-type Props = {
-  collapsed?: boolean;
-  setCollapsed?: (v: boolean) => void;
-  mobile?: boolean;
-  closeMobile?: () => void;
-};
+const menuItems = [
+  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/booking", label: "Booking", icon: CalendarCheck },
+  { href: "/admin/pembayaran", label: "Pembayaran", icon: Wallet },
+  { href: "/admin/laporan", label: "Laporan", icon: FileBarChart },
+  { href: "/admin/manage/inventory", label: "Inventaris", icon: Boxes },
+  { href: "/admin/manage/users", label: "Pengguna", icon: Users },
+];
 
-export default function Sidebar({
-  collapsed = true,
-  setCollapsed,
-  mobile = false,
-  closeMobile,
-}: Props) {
+export function Sidebar() {
   const pathname = usePathname();
 
-  const menu = [
-    { label: "Dashboard", href: "/admin" },
-    { label: "Guesthouses", href: "/admin/guesthouses" },
-    { label: "Rooms", href: "/admin/rooms" },
-    { label: "Bookings", href: "/admin/bookings" },
-    { label: "Users", href: "/admin/users" },
-    { label: "Settings", href: "/admin/settings" },
-  ];
-
   return (
-    <aside
-      className={`
-        ${collapsed ? "w-20" : "w-64"}
-        h-screen
-        bg-gray-900
-        text-gray-100
-        flex flex-col
-        justify-between
-        transition-all duration-300
-      `}
-    >
-      {/* Top */}
+    <aside className="hidden w-64 shrink-0 flex-col justify-between bg-forest text-sand md:flex">
       <div>
-        <div className="p-4 border-b border-blue-800 flex items-center justify-between">
-          {!collapsed && (
-            <div>
-              <h2 className="font-bold">Admin Panel</h2>
-              <p className="text-xs text-gray-400">
-                Guesthouse Manager
-              </p>
-            </div>
-          )}
-
-          {!mobile && setCollapsed && (
-            <button
-              onClick={() => setCollapsed(!collapsed)}
-              className="text-gray-400 text-sm"
-            >
-              {collapsed ? "»" : "«"}
-            </button>
-          )}
+        <div className="flex items-center gap-3 border-b border-white/10 px-6 py-5">
+          <div className="rounded-xl bg-terracotta p-2 text-white">
+            <Building2 className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-base font-bold leading-tight text-white">
+              Darunnajah
+            </h1>
+            <p className="text-xs text-sand/70">Admin Panel</p>
+          </div>
         </div>
 
-        <nav className="p-3 space-y-1 text-sm">
-          {menu.map((item) => {
-            const active =
-              pathname === item.href ||
-              pathname.startsWith(item.href + "/");
+        <nav className="space-y-1 p-4">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname.startsWith(item.href);
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={closeMobile}
-                className={`
-                  block px-3 py-2 rounded-lg transition
-                  ${
-                    active
-                      ? "bg-gray-800 text-white"
-                      : "text-gray-400 hover:bg-gray-800 hover:text-white"
-                  }
-                `}
+                className={`flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-terracotta text-white"
+                    : "text-sand/80 hover:bg-white/5 hover:text-white"
+                }`}
               >
-                {collapsed ? item.label.charAt(0) : item.label}
+                <Icon className="h-4 w-4" />
+                <span>{item.label}</span>
               </Link>
             );
           })}
         </nav>
-      </div>
-
-      {/* Bottom */}
-      <div className="p-3 border-t border-gray-800">
-        <button className="w-full text-left px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-gray-800 transition">
-          {collapsed ? "⎋" : "Logout"}
-        </button>
       </div>
     </aside>
   );

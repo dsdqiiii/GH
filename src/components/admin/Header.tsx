@@ -1,17 +1,22 @@
-export default function Header() {
+import { LogOut } from "lucide-react";
+import { logoutAction } from "@/actions/auth";
+
+export function Header() {
   return (
-    <header className="h-32 bg-blue-600 border-b text-white border-gray-200 flex items-center justify-between px-6">
-      <div className="text-sm">
-        Welcome back, Admin
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-sand bg-surface px-6">
+      <div className="text-sm font-medium text-ink">
+        Penginapan Darunnajah
       </div>
 
-      <div className="flex items-center gap-4">
-        <button className="text-sm hover:text-gray-900">
-          Notifications
+      <form action={logoutAction}>
+        <button
+          type="submit"
+          className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-taupe transition-colors hover:bg-cream hover:text-terracotta"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Keluar</span>
         </button>
-
-        <div className="w-8 h-8 bg-gray-300 rounded-full" />
-      </div>
+      </form>
     </header>
   );
 }
