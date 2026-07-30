@@ -2,7 +2,6 @@ import { notFound, redirect } from "next/navigation";
 
 import { Card } from "@/components/ui/core/card";
 import { Badge } from "@/components/ui/core/badge";
-import { BackButton } from "@/components/ui/navigation/BackButton";
 import { PageShell } from "@/components/ui/layout/PageShell";
 import { PageHeader } from "@/components/ui/layout/PageHeader";
 
@@ -16,6 +15,8 @@ import { getAvailableUnits, type TypeBooking } from "@/services/availablility";
 import PropertyGallery from "@/components/landing/PropertyGallery";
 import PickRange from "@/components/booking/PickRange";
 import BookingForm from "@/components/booking/BookingForm";
+
+import { formatCurrency } from "@/utils/formatter.utils";
 
 export default async function UnitPage({
   params,
@@ -43,7 +44,7 @@ export default async function UnitPage({
 
   const hasDateRange = Boolean(sp.checkin && sp.checkout);
 
-  // Re-validasi: kalau ada filter tanggal, pastikan unit INI masih tersedia
+  // Re-validasi ketersediaan unit jika ada filter tanggal
   if (hasDateRange) {
     const availableUnits = await getAvailableUnits({
       propertyId: property.id,
@@ -75,67 +76,100 @@ export default async function UnitPage({
 
   return (
     <PageShell>
-      <div className="max-w-5xl mx-auto px-6 pt-6">
-        <PageHeader eyebrow={property.name} title={unit.name} />
-      </div>
+      {/* Container Utama */}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 space-y-8 sm:space-y-10">
+        
+        {/* Header */}
+        <section>
+          <PageHeader eyebrow={property.name} title={unit.name} />
+        </section>
 
-      <section className="max-w-5xl mx-auto px-6 pt-4">
-        <PropertyGallery images={images} alt={unit.name} />
-      </section>
-
-      <section className="max-w-5xl mx-auto px-6 pt-10">
-
-        {unit.descriptions && (
-          <p className="text-base leading-relaxed max-w-2xl mb-4 mt-3 text-ink">
-            {unit.descriptions}
-          </p>
-        )}
-
-        {facilities.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {facilities.map((facility) => (
-              <Badge key={facility.id} size="sm">
-                {facility.name}
-              </Badge>
-            ))}
+        {/* Top Hero Section: Galeri (Kiri) & Sticky PickRange (Kanan) */}
+        <section className="grid grid-cols-1 lg:grid-cols-[1fr_360px] xl:grid-cols-[1fr_400px] gap-6 xl:gap-8 items-start">
+          
+          {/* Main Content Kiri: Galeri Foto */}
+          <div className="w-full min-w-0">
+            <PropertyGallery images={images} alt={unit.name} />
           </div>
-        )}
-      </section>
 
-      <section className="max-w-5xl mx-auto px-6 py-10">
-        <Card variant="elevated" className="flex items-center justify-between">
-          <div>
-            <p className="text-sm mb-1 text-taupe">Harga per malam</p>
-            <p className="text-3xl font-semibold text-forest">
-              Rp {pricePerNight.toLocaleString("id-ID")}
-            </p>
-          </div>
-        </Card>
-      </section>
-
-      <section className="max-w-5xl mx-auto px-6 pb-16">
-        {hasDateRange ? (
-          <BookingForm
-            unitId={unit.id}
-            unitName={unit.name}
-            pricePerNight={pricePerNight}
-            pricePerHour={unit.price_per_hour}
-            isTransitEnabled={unit.is_transit_enabled}
-            addons={addons}
-            isLoggedIn={false}
-            checkIn={sp.checkin!}
-            checkOut={sp.checkout!}
-            bookingType={sp.type ?? "inap"}
-          />
-        ) : (
-          <div>
-            <p className="text-sm mb-3 text-taupe">
-              Pilih tanggal untuk melanjutkan booking kamar ini.
-            </p>
+          {/* Sidebar Kanan: PickRange & Card Ringkasan Harga (Selalu Tampil) */}
+          <aside className="w-full lg:sticky lg:top-6 space-y-4">
             <PickRange />
-          </div>
-        )}
-      </section>
+
+            <Card variant="elevated">
+              <p className="text-xs sm:text-sm text-taupe font-medium">
+                Harga per malam
+              </p>
+              <p className="mt-1 text-2xl sm:text-3xl font-semibold text-forest">
+                {formatCurrency(pricePerNight)}
+              </p>
+              <p className="mt-3 text-xs sm:text-sm text-taupe leading-relaxed">
+                {hasDateRange
+                  ? "Tanggal dipilih! Gulir ke bawah untuk melengkapi formulir pemesanan."
+                  : "Pilih tanggal menginap di atas untuk melihat ketersediaan & memesan kamar ini."}
+              </p>
+            </Card>
+          </aside>
+        </section>
+
+        {/* Bottom Section: Informasi Detail & Form Booking */}
+        <section className="border-t border-sand/60 pt-8 sm:pt-10 pb-12 space-y-10">
+          
+          {/* Deskripsi & Fasilitas Kamar */}
+          {(unit.descriptions || facilities.length > 0) && (
+            <div className="max-w-4xl space-y-8">
+              {/* Deskripsi Unit */}
+              {unit.descriptions && (
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-semibold mb-3 text-forest">
+                    Tentang Kamar
+                  </h2>
+                  <p className="leading-relaxed text-sm sm:text-base text-ink">
+                    {unit.descriptions}
+                  </p>
+                </div>
+              )}
+
+              {/* Fasilitas Unit */}
+              {facilities.length > 0 && (
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-forest">
+                    Fasilitas Kamar
+                  </h2>
+                  <div className="flex flex-wrap gap-2 sm:gap-3">
+                    {facilities.map((facility) => (
+                      <Badge key={facility.id}>{facility.name}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Form Booking (Hanya Tampil Jika Tanggal Sudah Dipilih) */}
+          {hasDateRange && (
+            <div className="max-w-4xl border-t border-sand/60 pt-8">
+              <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-forest">
+                Formulir Pemesanan
+              </h2>
+              <BookingForm
+                unitId={unit.id}
+                unitName={unit.name}
+                pricePerNight={pricePerNight}
+                pricePerHour={unit.price_per_hour}
+                isTransitEnabled={unit.is_transit_enabled}
+                addons={addons}
+                isLoggedIn={false}
+                checkIn={sp.checkin!}
+                checkOut={sp.checkout!}
+                bookingType={sp.type ?? "inap"}
+              />
+            </div>
+          )}
+
+        </section>
+
+      </div>
     </PageShell>
   );
 }

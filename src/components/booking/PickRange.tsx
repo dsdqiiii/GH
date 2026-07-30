@@ -1,264 +1,244 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { FLOOR } from "@/lib/constants/floor";
+import { useState } from "react";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { Button } from "@/components/ui/core/button";
+import { FLOOR } from "@/lib/constants/floor"; // sesuaikan path import sesuai lokasi file constants Anda
 
-const ALL_FLOOR = "Semua Lantai";
-type FloorOption = typeof ALL_FLOOR | (typeof FLOOR)[number];
-type BookingMode = "inap" | "transit";
-
-const MAX_TRANSIT_HOURS = 5;
-
-interface PickRangeProps {
-  onSearch?: (params: {
-    checkin: string;
-    checkout: string;
-    adult: number;
-    floor: FloorOption;
-    type: BookingMode;
-  }) => void;
+interface PropertyOption {
+  id: string;
+  slug: string;
+  name: string;
 }
 
-export default function PickRange({ onSearch }: PickRangeProps) {
+interface PickRangeProps {
+  mode?: "global" | "property";
+  properties?: PropertyOption[];
+}
+
+export default function PickRange({
+  mode = "property",
+  properties = [],
+}: PickRangeProps) {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+  const params = useParams();
 
-  const [mode, setMode] = useState<BookingMode>(
-    (searchParams.get("type") as BookingMode) ?? "inap"
+  const currentSlug = (params?.slug as string) || properties[0]?.slug || "";
+
+  // State
+  const [selectedSlug, setSelectedSlug] = useState<string>(currentSlug);
+  const [bookingType, setBookingType] = useState<"inap" | "transit">(
+    (searchParams.get("type") as "inap" | "transit") || "inap"
   );
 
-  // Mode inap
-  const [checkin, setCheckin] = useState(searchParams.get("checkin") ?? "");
-  const [checkout, setCheckout] = useState(searchParams.get("checkout") ?? "");
+  // State untuk Mode Inap
+  const [checkIn, setCheckIn] = useState(searchParams.get("checkin") || "");
+  const [checkOut, setCheckOut] = useState(searchParams.get("checkout") || "");
 
-  // Mode transit
-  const [transitDate, setTransitDate] = useState("");
-  const [transitStartTime, setTransitStartTime] = useState("14:00");
-  const [transitHours, setTransitHours] = useState(2);
-
-  const [adult, setAdult] = useState(
-    Number(searchParams.get("adult")) || 2
+  // State untuk Mode Transit
+  const [transitDate, setTransitDate] = useState(
+    searchParams.get("transitDate") || searchParams.get("checkin")?.split("T")[0] || ""
   );
-  const [floor, setFloor] = useState<FloorOption>(
-    (searchParams.get("floor") as FloorOption) ?? ALL_FLOOR
+  const [checkInTime, setCheckInTime] = useState(
+    searchParams.get("time") || "10:00"
   );
-  const [error, setError] = useState<string | null>(null);
+  const [durationHours, setDurationHours] = useState(
+    searchParams.get("duration") || "3"
+  );
 
-  function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
+  const [adult, setAdult] = useState(searchParams.get("adult") || "1");
+  const [floor, setFloor] = useState(searchParams.get("floor") || "");
+
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
 
-    if (!Number.isFinite(adult) || adult < 1) {
-      setError("Jumlah tamu minimal 1");
-      return;
-    }
+    const query = new URLSearchParams();
+    query.set("type", bookingType);
+    if (adult) query.set("adult", adult);
+    if (floor) query.set("floor", floor);
 
-    let finalCheckin: string;
-    let finalCheckout: string;
-
-    if (mode === "inap") {
-      if (!checkin || !checkout) {
-        setError("Tanggal check-in dan check-out wajib diisi");
-        return;
-      }
-      if (new Date(checkout) <= new Date(checkin)) {
-        setError("Tanggal check-out harus setelah check-in");
-        return;
-      }
-      finalCheckin = new Date(checkin).toISOString();
-      finalCheckout = new Date(checkout).toISOString();
+    if (bookingType === "inap") {
+      if (checkIn) query.set("checkin", checkIn);
+      if (checkOut) query.set("checkout", checkOut);
     } else {
-      if (!transitDate || !transitStartTime) {
-        setError("Tanggal dan jam mulai transit wajib diisi");
-        return;
+      if (transitDate) {
+        query.set("checkin", `${transitDate}T${checkInTime}`);
+        query.set("transitDate", transitDate);
       }
-      if (!Number.isFinite(transitHours) || transitHours < 1 || transitHours > MAX_TRANSIT_HOURS) {
-        setError(`Durasi transit 1-${MAX_TRANSIT_HOURS} jam`);
-        return;
-      }
-
-      const start = new Date(`${transitDate}T${transitStartTime}`);
-      const end = new Date(start.getTime() + transitHours * 60 * 60 * 1000);
-
-      finalCheckin = start.toISOString();
-      finalCheckout = end.toISOString();
+      query.set("time", checkInTime);
+      query.set("duration", durationHours);
     }
 
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("type", mode);
-    params.set("checkin", finalCheckin);
-    params.set("checkout", finalCheckout);
-    params.set("adult", String(adult));
-    if (floor === ALL_FLOOR) {
-      params.delete("floor");
-    } else {
-      params.set("floor", floor);
-    }
+    const targetSlug = mode === "global" ? selectedSlug : currentSlug;
+    if (!targetSlug) return;
 
-    startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`);
-    });
-
-    onSearch?.({ checkin: finalCheckin, checkout: finalCheckout, adult, floor, type: mode });
+    router.push(`/guesthouse/${targetSlug}?${query.toString()}`);
   }
 
-  const today = new Date().toISOString().split("T")[0];
-
-  const inputClass =
-    "rounded-lg px-3 py-2 text-sm border border-sand text-ink bg-white outline-none transition-colors focus:ring-2 focus:ring-terracotta focus:ring-offset-0";
+  // Utility class agar tinggi seluruh field seragam (h-11 = 44px)
+  const inputBaseClass =
+    "w-full h-11 border border-sand rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-forest text-ink";
 
   return (
-    <div className="rounded-xl p-4 bg-surface border border-sand shadow-[0_2px_12px_rgba(31,59,54,0.08)]">
-      <h2 className="text-base font-semibold mb-3 text-forest">
-        Cari range yang tersedia dulu, yuk!
-      </h2>
+    <form
+      onSubmit={handleSubmit}
+      className="bg-surface p-5 sm:p-6 rounded-2xl border border-sand/60 shadow-sm space-y-4 text-ink"
+    >
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="font-semibold text-base sm:text-lg text-forest">
+          {mode === "global" ? "Cari Guest House" : "Cari Ketersediaan Kamar"}
+        </h3>
 
-      {/* Toggle mode */}
-      <div className="flex gap-2 mb-4">
-        {(["inap", "transit"] as BookingMode[]).map((m) => (
-          <button
-            key={m}
+        {/* Toggle Mode Inap / Transit */}
+        <div className="flex bg-sand/30 p-1 rounded-lg gap-1">
+          <Button
             type="button"
-            onClick={() => setMode(m)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
-              mode === m
-                ? "bg-terracotta text-white"
-                : "bg-white border border-sand text-taupe"
-            }`}
+            variant={bookingType === "inap" ? "brand" : "ghost"}
+            onClick={() => setBookingType("inap")}
+            className="text-xs px-3 py-1.5 h-auto"
           >
-            {m}
-          </button>
-        ))}
+            Inap
+          </Button>
+          <Button
+            type="button"
+            variant={bookingType === "transit" ? "brand" : "ghost"}
+            onClick={() => setBookingType("transit")}
+            className="text-xs px-3 py-1.5 h-auto"
+          >
+            Transit
+          </Button>
+        </div>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="relative flex flex-col md:flex-row gap-3 md:items-end"
-      >
-        {mode === "inap" ? (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        {/* INPUT PROPERTI (Hanya di mode global) */}
+        {mode === "global" && (
+          <div className="col-span-1 sm:col-span-2">
+            <label className="block text-xs font-medium text-taupe mb-1">
+              Pilih Guest House
+            </label>
+            <select
+              value={selectedSlug}
+              onChange={(e) => setSelectedSlug(e.target.value)}
+              className={inputBaseClass}
+            >
+              {properties.map((prop) => (
+                <option key={prop.id} value={prop.slug}>
+                  {prop.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* INPUT KONDISIONAL BERDASARKAN TIPE BOOKING */}
+        {bookingType === "inap" ? (
           <>
-            <div className="flex flex-col gap-1 flex-1">
-              <label htmlFor="checkin" className="text-xs font-medium text-taupe">
+            <div>
+              <label className="block text-xs font-medium text-taupe mb-1">
                 Check-in
               </label>
               <input
-                id="checkin"
                 type="date"
-                min={today}
-                value={checkin}
-                onChange={(e) => setCheckin(e.target.value)}
-                className={inputClass}
+                value={checkIn}
+                onChange={(e) => setCheckIn(e.target.value)}
+                className={inputBaseClass}
               />
             </div>
 
-            <div className="flex flex-col gap-1 flex-1">
-              <label htmlFor="checkout" className="text-xs font-medium text-taupe">
+            <div>
+              <label className="block text-xs font-medium text-taupe mb-1">
                 Check-out
               </label>
               <input
-                id="checkout"
                 type="date"
-                min={checkin || today}
-                value={checkout}
-                onChange={(e) => setCheckout(e.target.value)}
-                className={inputClass}
+                value={checkOut}
+                onChange={(e) => setCheckOut(e.target.value)}
+                className={inputBaseClass}
               />
             </div>
           </>
         ) : (
           <>
-            <div className="flex flex-col gap-1 flex-1">
-              <label htmlFor="transitDate" className="text-xs font-medium text-taupe">
-                Tanggal
+            <div className="col-span-1 sm:col-span-2">
+              <label className="block text-xs font-medium text-taupe mb-1">
+                Tanggal Transit
               </label>
               <input
-                id="transitDate"
                 type="date"
-                min={today}
                 value={transitDate}
                 onChange={(e) => setTransitDate(e.target.value)}
-                className={inputClass}
+                className={inputBaseClass}
               />
             </div>
 
-            <div className="flex flex-col gap-1 w-full md:w-32">
-              <label htmlFor="transitStartTime" className="text-xs font-medium text-taupe">
-                Jam Mulai
+            <div>
+              <label className="block text-xs font-medium text-taupe mb-1">
+                Waktu Masuk
               </label>
               <input
-                id="transitStartTime"
                 type="time"
-                value={transitStartTime}
-                onChange={(e) => setTransitStartTime(e.target.value)}
-                className={inputClass}
+                value={checkInTime}
+                onChange={(e) => setCheckInTime(e.target.value)}
+                className={inputBaseClass}
               />
             </div>
 
-            <div className="flex flex-col gap-1 w-full md:w-28">
-              <label htmlFor="transitHours" className="text-xs font-medium text-taupe">
-                Durasi (jam)
+            <div>
+              <label className="block text-xs font-medium text-taupe mb-1">
+                Durasi (Jam)
               </label>
               <input
-                id="transitHours"
                 type="number"
                 min={1}
-                max={MAX_TRANSIT_HOURS}
-                value={Number.isFinite(transitHours) ? transitHours : ""}
-                onChange={(e) => setTransitHours(Number(e.target.value))}
-                className={inputClass}
+                max={5}
+                value={durationHours}
+                onChange={(e) => setDurationHours(e.target.value)}
+                className={inputBaseClass}
               />
             </div>
           </>
         )}
 
-        <div className="flex flex-col gap-1 w-full md:w-32">
-          <label htmlFor="adult" className="text-xs font-medium text-taupe">
-            Tamu (dewasa)
+        {/* Jumlah Tamu */}
+        <div>
+          <label className="block text-xs font-medium text-taupe mb-1">
+            Tamu (Dewasa)
           </label>
           <input
-            id="adult"
             type="number"
-            readOnly
             min={1}
-            value={Number.isFinite(adult) ? adult : ""}
-            onChange={(e) => setAdult(Number(e.target.value))}
-            className={inputClass}
+            max={20}
+            value={adult}
+            onChange={(e) => setAdult(e.target.value)}
+            className={inputBaseClass}
           />
         </div>
 
-        <div className="flex flex-col gap-1 w-full md:w-36">
-          <label htmlFor="floor" className="text-xs font-medium text-taupe">
+        {/* Filter Lantai dari FLOOR Constant */}
+        <div>
+          <label className="block text-xs font-medium text-taupe mb-1">
             Lantai
           </label>
           <select
-            id="floor"
             value={floor}
-            onChange={(e) => setFloor(e.target.value as FloorOption)}
-            className={inputClass}
+            onChange={(e) => setFloor(e.target.value)}
+            className={inputBaseClass}
           >
-            <option value={ALL_FLOOR}>{ALL_FLOOR}</option>
-            {FLOOR.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
+            <option value="">Semua Lantai</option>
+            {FLOOR.map((item) => (
+              <option key={item} value={item}>
+                {item}
               </option>
             ))}
           </select>
         </div>
+      </div>
 
-        <Button type="submit" variant="brand" isLoading={isPending} className="px-5 py-2 text-sm">
-          Cari Kamar
-        </Button>
-
-        {error && (
-          <p className="text-xs md:absolute md:-bottom-6 text-terracotta">
-            {error}
-          </p>
-        )}
-      </form>
-    </div>
+      <Button type="submit" variant="brand" className="w-full h-11 mt-2 text-sm font-medium">
+        Cari Kamar
+      </Button>
+    </form>
   );
 }

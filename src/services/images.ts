@@ -1,4 +1,5 @@
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export async function getMainImagesByPropertyId(propertyId: string) {
   const supabase = await createSupabaseServer();
@@ -11,7 +12,6 @@ export async function getMainImagesByPropertyId(propertyId: string) {
     .is("is_main", true);
 
   if (error || !data) return [];
-  console.log(data)
 
   return data
     .map((row) => {
@@ -34,7 +34,6 @@ export async function getPropertyImagesByPropertyId(propertyId: string) {
     .eq("reference_id", propertyId);
 
   if (error || !data) return [];
-  console.log(data)
 
   return data
     .map((row) => {
@@ -78,6 +77,8 @@ export async function getHeroImages(): Promise<HeroImage[]> {
   const { data: files, error } = await supabase.storage
     .from("GH")
     .list("public/HERO");
+
+  console.log(files);
 
   if (error || !files) return [];
 

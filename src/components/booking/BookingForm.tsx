@@ -2,8 +2,13 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/core/button";
-import PickRange from "./PickRange";
-import type { BookingFormProps, FormState, FormErrors, BookingPayload } from "@/lib/types/booking.types";
+import { FileUpload } from "@/components/booking/FileUpload";
+import type {
+  BookingFormProps,
+  FormState,
+  FormErrors,
+  BookingPayload,
+} from "@/lib/types/booking.types";
 import {
   initialBookingState,
   calculateNights,
@@ -38,20 +43,33 @@ export default function BookingForm({
   const [form, setForm] = useState<FormState>(initialBookingState);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isEditingDate, setIsEditingDate] = useState(false);
+
+  // State terpisah untuk menampung file upload identitas/bukti
+  const [identityFile, setIdentityFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: undefined }));
   }
 
-  const nights = bookingType === "inap"
-    ? calculateNights(new Date(checkIn), new Date(checkOut))
-    : 0;
+  // Helper untuk scroll ke PickRange di sidebar atas
+  function handleScrollToSidebarPicker() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
-  const durationHours = bookingType === "transit"
-    ? Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60))
-    : 0;
+  const nights =
+    bookingType === "inap"
+      ? calculateNights(new Date(checkIn), new Date(checkOut))
+      : 0;
+
+  const durationHours =
+    bookingType === "transit"
+      ? Math.round(
+          (new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
+            (1000 * 60 * 60)
+        )
+      : 0;
 
   const roomSubtotal = calculateRoomSubtotal(
     bookingType,
@@ -63,16 +81,36 @@ export default function BookingForm({
   const addonSubtotal = calculateAddonSubtotal(form, addons, nights);
   const total = roomSubtotal + addonSubtotal;
 
-  async function handleSubmit(e: React.SubmitEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
+    // 1. Validasi form biasa
     const validationErrors = validateBookingForm(form, isLoggedIn);
     setErrors(validationErrors);
+
+    // Optional: Validasi file identitas jika wajib bagi guest (non-logged in)
+    if (!isLoggedIn && !identityFile) {
+      setFileError("Silakan unggah foto identitas (KTP/SIM) terlebih dahulu");
+      if (Object.keys(validationErrors).length > 0) return;
+      return;
+    } else {
+      setFileError(null);
+    }
 
     if (Object.keys(validationErrors).length > 0) return;
 
     setIsSubmitting(true);
 
+    // 2. Dummy Process Upload File
+    let uploadedFileUrl: string | null = null;
+    if (identityFile) {
+      console.log("[DUMMY UPLOAD] Memproses upload file:", identityFile.name);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      uploadedFileUrl = `https://dummy-storage.local/uploads/${Date.now()}_${identityFile.name}`;
+      console.log("[DUMMY UPLOAD] File berhasil diunggah ke:", uploadedFileUrl);
+    }
+
+    // 3. Menyiapkan payload booking
     const payload: BookingPayload = {
       unitId,
       bookingType,
@@ -94,26 +132,15 @@ export default function BookingForm({
       ),
     };
 
+    console.log("[DUMMY BOOKING SUBMIT]", payload);
+
     const userId = undefined;
 
+    // 4. Kirim data ke backend / Server Action
     const result = await createBooking(payload, userId);
     await new Promise((resolve) => setTimeout(resolve, 800));
-    setIsSubmitting(false);
-  }
 
-  if (isEditingDate) {
-    return (
-      <div>
-        <button
-          type="button"
-          onClick={() => setIsEditingDate(false)}
-          className="text-sm text-taupe mb-3 hover:text-forest transition-colors"
-        >
-          ← Batal, kembali ke ringkasan
-        </button>
-        <PickRange />
-      </div>
-    );
+    setIsSubmitting(false);
   }
 
   return (
@@ -134,7 +161,9 @@ export default function BookingForm({
       <div className="rounded-lg border border-sand bg-white p-4 flex items-center justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-wide text-taupe mb-1">
-            {bookingType === "inap" ? "Check-in — Check-out" : "Tanggal Transit"}
+            {bookingType === "inap"
+              ? "Check-in — Check-out"
+              : "Tanggal Transit"}
           </p>
           <p className="text-sm font-medium text-forest">
             {formatDateDisplay(checkIn)} → {formatDateDisplay(checkOut)}
@@ -147,19 +176,21 @@ export default function BookingForm({
           )}
         </div>
 
-        <button
+        {/* Klik tombol ini untuk scroll kembali ke PickRange di sidebar */}
+        <Button
           type="button"
-          onClick={() => setIsEditingDate(true)}
-          className="text-sm font-medium text-terracotta hover:text-terracotta-dark transition-colors whitespace-nowrap"
+          variant="ghost"
+          onClick={handleScrollToSidebarPicker}
+          className="text-terracotta hover:text-terracotta-dark font-medium whitespace-nowrap h-auto p-0"
         >
           Ubah Tanggal
-        </button>
+        </Button>
       </div>
 
       <div>
         <label className="text-sm text-taupe">Jumlah Tamu</label>
         <input
-          type="numeric"
+          type="number"
           min={1}
           max={20}
           value={form.totalGuest}
@@ -187,7 +218,9 @@ export default function BookingForm({
           </div>
 
           <div>
-            <label className="text-sm text-taupe">No. Handphone (Whatsapp) Aktif</label>
+            <label className="text-sm text-taupe">
+              No. Handphone (Whatsapp) Aktif
+            </label>
             <input
               placeholder="WhatsApp"
               value={form.guestPhone}
@@ -213,58 +246,63 @@ export default function BookingForm({
           </div>
         </div>
       )}
+
       {addons.length > 0 && (
-  <div className="border-t border-sand pt-3">
-    <p className="text-sm font-medium text-forest mb-3">Tambahan</p>
+        <div className="border-t border-sand pt-3">
+          <p className="text-sm font-medium text-forest mb-3">Tambahan</p>
 
-    <div className="flex flex-col gap-3">
-      {addons.map((addon) => {
-        const isChecked = Boolean(form.selectedAddons[addon.id]);
+          <div className="flex flex-col gap-3">
+            {addons.map((addon) => {
+              const isChecked = Boolean(form.selectedAddons[addon.id]);
 
-        return (
-          <label
-            key={addon.id}
-            className="flex items-start gap-3 rounded-lg border border-sand p-3 cursor-pointer hover:bg-cream/40 transition-colors"
-          >
-            <input
-              type="checkbox"
-              checked={isChecked}
-              onChange={(e) => {
-                const next = { ...form.selectedAddons };
-                if (e.target.checked) {
-                  next[addon.id] = 1;
-                } else {
-                  delete next[addon.id];
-                }
-                updateField("selectedAddons", next);
-              }}
-              className="mt-1 accent-terracotta"
-            />
+              return (
+                <label
+                  key={addon.id}
+                  className="flex items-start gap-3 rounded-lg border border-sand p-3 cursor-pointer hover:bg-cream/40 transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={(e) => {
+                      const next = { ...form.selectedAddons };
+                      if (e.target.checked) {
+                        next[addon.id] = 1;
+                      } else {
+                        delete next[addon.id];
+                      }
+                      updateField("selectedAddons", next);
+                    }}
+                    className="mt-1 accent-terracotta"
+                  />
 
-            <div className="flex-1">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium text-ink">
-                  {addon.name}
-                </span>
-                <span className="text-sm text-taupe whitespace-nowrap">
-                  Rp {addon.price.toLocaleString("id-ID")}
-                  {addon.pricing_unit === "per_night" && " / malam"}
-                  {addon.pricing_unit === "per_guest" && " / tamu"}
-                  {addon.pricing_unit === "per_guest_per_night" && " / tamu / malam"}
-                </span>
-              </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-medium text-ink">
+                        {addon.name}
+                      </span>
+                      <span className="text-sm text-taupe whitespace-nowrap">
+                        Rp {addon.price.toLocaleString("id-ID")}
+                        {addon.pricing_unit === "per_night" && " / malam"}
+                        {addon.pricing_unit === "per_guest" && " / tamu"}
+                        {addon.pricing_unit === "per_guest_per_night" &&
+                          " / tamu / malam"}
+                      </span>
+                    </div>
 
-              {addon.description && (
-                <p className="text-xs text-taupe mt-1">{addon.description}</p>
-              )}
-            </div>
-          </label>
-        );
-      })}
-    </div>
-  </div>
-)}
+                    {addon.description && (
+                      <p className="text-xs text-taupe mt-1">
+                        {addon.description}
+                      </p>
+                    )}
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
+      {/* Summary Total Harga */}
       <div className="border-t border-sand pt-3 space-y-1">
         <p className="text-sm text-taupe">
           Kamar: Rp {roomSubtotal.toLocaleString("id-ID")}
@@ -277,8 +315,30 @@ export default function BookingForm({
         </p>
       </div>
 
-      <Button disabled={isSubmitting} type="submit" variant="brand" isLoading={isSubmitting}>
-        Lanjutkan Booking
+      {/* Upload File (khusus guest non-logged in) */}
+      {!isLoggedIn && (
+        <div className="border-t border-sand pt-4">
+          <FileUpload
+            label="Upload Bukti Pembayaran"
+            accept="image/jpeg,image/png,application/pdf,.pdf"
+            maxSizeMB={2}
+            value={identityFile}
+            onChange={(file) => {
+              setIdentityFile(file);
+              if (file) setFileError(null);
+            }}
+            error={fileError || undefined}
+          />
+        </div>
+      )}
+
+      <Button
+        disabled={isSubmitting}
+        type="submit"
+        variant="brand"
+        isLoading={isSubmitting}
+      >
+        {isSubmitting ? "Memproses..." : "Lanjutkan Booking"}
       </Button>
     </form>
   );

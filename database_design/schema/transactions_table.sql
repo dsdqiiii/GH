@@ -35,7 +35,12 @@ CREATE TABLE IF NOT EXISTS order_items (
     checked_in_at timestamptz,
     checked_out_by uuid references auth.users(id) on delete restrict,
     checked_out_at timestamptz,
-    constraint order_items_dates_check check (check_out > check_in)
+    constraint order_items_dates_check check (check_out > check_in),
+    constraint order_items_transit_duration_check
+    check (
+    type_booking <> 'transit'
+    or (check_out - check_in) between interval '1 hour' and interval '5 hours'
+    )
 );
 
 CREATE TABLE IF NOT EXISTS order_item_addons (

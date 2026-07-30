@@ -1,23 +1,31 @@
-import { Button } from "@/components/ui/core/button";
+import PickRange from "@/components/booking/PickRange";
 
-export default function JoinSection() {
+interface PropertyOption {
+  id: string;
+  slug: string;
+  name: string;
+}
+
+export default function JoinSection({
+  properties = [],
+}: {
+  properties?: PropertyOption[];
+}) {
   return (
-    <section className="py-20 bg-surface">
-      <div className="max-w-4xl mx-auto px-6 text-center">
+    <section className="py-12 bg-surface rounded-2xl border border-sand/60 px-6 sm:px-10">
+      <div className="max-w-4xl mx-auto text-center space-y-4 mb-8">
         <h2 className="text-3xl md:text-4xl font-semibold text-forest">
           Dapatkan Pengalaman Menginap Terbaik
         </h2>
-
-        <p className="mt-4 text-base leading-relaxed max-w-2xl mx-auto text-taupe">
+        <p className="text-base leading-relaxed max-w-2xl mx-auto text-taupe">
           Guest House Andalusia bukan sekadar tempat menginap, tetapi ruang
           nyaman untuk beristirahat dan menikmati perjalanan Anda.
         </p>
+      </div>
 
-        <div className="mt-8">
-          <Button href="/guesthouse" variant="brand">
-            Lihat Guest House
-          </Button>
-        </div>
+      {/* Form PickRange menggantikan Button biasa */}
+      <div className="max-w-xl mx-auto">
+        <PickRange mode="global" properties={properties} />
       </div>
     </section>
   );

@@ -4,11 +4,22 @@ import JoinSection from "@/components/landing/JoinSection";
 import Footer from "@/components/landing/Footer";
 
 import { getHeroImages } from "@/services/images";
+import { getProperties } from "@/services/property"; // 1. Import service properti
 
 export default async function HomePage() {
-  const heroImages = (await getHeroImages()).map(
-    (image) => image.url
-  );
+  const [heroImagesData, propertiesData] = await Promise.all([
+    getHeroImages(),
+    getProperties(), // 2. Fetch list guesthouse
+  ]);
+
+  const heroImages = heroImagesData.map((image) => image.url);
+
+  // 3. Mapping data properti simpel
+  const propertyOptions = propertiesData.map((prop) => ({
+    id: prop.id,
+    slug: prop.slug,
+    name: prop.name,
+  }));
 
   return (
     <div
@@ -26,10 +37,8 @@ export default async function HomePage() {
         </section>
 
         {/* Join */}
-        <section
-          className="max-w-7xl mx-auto px-6 pb-20"
-        >
-          <JoinSection />
+        <section className="max-w-7xl mx-auto px-6 pb-20">
+          <JoinSection properties={propertyOptions} />
         </section>
       </main>
 

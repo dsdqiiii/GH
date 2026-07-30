@@ -1,12 +1,12 @@
 import { getDashboardSummary } from "@/services/admin/dashboard";
 import { getRecentBookings } from "@/services/admin/recent-bookings";
 import { SummaryCard } from "@/components/admin/SummaryCard";
-import { RecentBookingsTable } from "@/components/admin/BookingTables";
+import { RecentBookingsTable } from "@/components/admin/RecentBookingTables";
 
 export default async function AdminDashboardPage() {
   const [summary, recentBookings] = await Promise.all([
     getDashboardSummary(),
-    getRecentBookings(10),
+    getRecentBookings(),
   ]);
 
   return (

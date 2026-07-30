@@ -58,7 +58,7 @@ export default function UnitCard({ propertySlug, unit, searchQuery }: UnitCardPr
 
           <Link href={href}>
             <Button variant="brand" className="w-full lg:w-auto px-8">
-              Pilih Kamar
+              Lihat Kamar
             </Button>
           </Link>
         </div>

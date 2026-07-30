@@ -1,4 +1,4 @@
-import { createSupabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export type DashboardSummary = {
   bookingHariIni: number;
@@ -13,7 +13,7 @@ export type DashboardSummary = {
  * - pendingPayments: jumlah payments dengan status pending (menunggu verifikasi admin)
  */
 export async function getDashboardSummary(): Promise<DashboardSummary> {
-  const supabase = await createSupabaseServer();
+  const supabase = supabaseAdmin;
 
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
@@ -38,6 +38,8 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
   if (bookingHariIniRes.error) throw bookingHariIniRes.error;
   if (pendingOrdersRes.error) throw pendingOrdersRes.error;
   if (pendingPaymentsRes.error) throw pendingPaymentsRes.error;
+
+  console.log(pendingPaymentsRes)
 
   return {
     bookingHariIni: bookingHariIniRes.count ?? 0,

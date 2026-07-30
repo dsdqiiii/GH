@@ -1,5 +1,5 @@
 import { PageShell } from "@/components/ui/layout/PageShell";
-import FeaturedGuesthouses from "@/components/landing/FeaturedGuestHouse";
+import FeaturedGuesthouses from "@/components/booking/FeaturedGuestHouse";
 
 export default function GuestHousePage() {
   return (

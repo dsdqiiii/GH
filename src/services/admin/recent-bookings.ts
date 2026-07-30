@@ -1,4 +1,4 @@
-import { createSupabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export type RecentBooking = {
   orderId: string;
@@ -17,10 +17,8 @@ export type RecentBooking = {
  * dan units (untuk nama unit). Kalau satu order punya beberapa order_items,
  * cukup ambil item pertama untuk ringkasan tabel.
  */
-export async function getRecentBookings(
-  limit: number = 10
-): Promise<RecentBooking[]> {
-  const supabase = await createSupabaseServer();
+export async function getRecentBookings(): Promise<RecentBooking[]> {
+  const supabase = supabaseAdmin;
 
   const { data, error } = await supabase
     .from("orders")
@@ -39,8 +37,8 @@ export async function getRecentBookings(
       )
     `
     )
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    .eq('status', "PENDING_PAYMENT")
+    .order("created_at", { ascending: false });
 
   if (error) throw error;
 
