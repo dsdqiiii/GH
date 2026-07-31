@@ -2,11 +2,7 @@
 
 import 'server-only';
 import { createClient } from "@supabase/supabase-js";
-<<<<<<< HEAD
-import type { Database } from "./supabase";
-=======
 import type { Database } from "../types/supabase";
->>>>>>> upstream/main
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

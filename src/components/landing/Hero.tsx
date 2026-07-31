@@ -8,15 +8,7 @@ interface HeroProps {
   images: string[];
 }
 
-<<<<<<< HEAD
-interface HeroProps {
-  images: string[];
-};
-
-export default function Hero({images}: HeroProps) {
-=======
 export default function Hero({ images }: HeroProps) {
->>>>>>> upstream/main
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -57,14 +49,7 @@ export default function Hero({ images }: HeroProps) {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-<<<<<<< HEAD
-          <a
-            href="/guesthouse"
-            className="px-6 py-3 bg-white text-black rounded-lg hover:bg-blue-700 transition text-sm sm:text-base"
-          >
-=======
           <Button href="/guesthouse" variant="brand" className="text-sm sm:text-base">
->>>>>>> upstream/main
             Lihat Guesthouse
           </Button>
         </div>

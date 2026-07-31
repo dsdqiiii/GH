@@ -1,11 +1,7 @@
 // packages/supabase/src/browser.ts
 
 import { createClient } from "@supabase/supabase-js";
-<<<<<<< HEAD
-import type { Database } from "./supabase";
-=======
 import type { Database } from "../types/supabase";
->>>>>>> upstream/main
 
 export function createSupabaseBrowser() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

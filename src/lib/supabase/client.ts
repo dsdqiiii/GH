@@ -1,11 +1,7 @@
 // packages/supabase/src/client.ts
 
 import { createBrowserClient } from "@supabase/ssr";
-<<<<<<< HEAD
-import type { Database } from "./supabase";
-=======
 import type { Database } from "../types/supabase";
->>>>>>> upstream/main
 
 let client: ReturnType<typeof createBrowserClient<Database>> | null = null;
 
