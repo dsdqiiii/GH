@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS galleries (
     reference_type varchar(20) not null check (reference_type in ('property', 'unit', 'organization')),
     reference_id uuid not null,
     url text not null,
-    is_hero boolean not null default false,
+    is_main boolean not null default false,
     is_active boolean not null default true,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()

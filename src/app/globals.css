@@ -3,6 +3,16 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Brand palette — Guest House Darunnajah */
+  --color-cream: #EDE6D6;       /* page background */
+  --color-surface: #FBF9F4;     /* card/surface background */
+  --color-forest: #1F3B36;      /* heading / dark text */
+  --color-ink: #2C2420;         /* body text */
+  --color-taupe: #6B5D4F;       /* muted / secondary text */
+  --color-terracotta: #B5654A;  /* accent / CTA */
+  --color-terracotta-dark: #9C5540; /* accent hover */
+  --color-sand: #CFC2B2;        /* border */
 }
 
 @theme inline {
@@ -10,6 +20,15 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --color-cream: var(--color-cream);
+  --color-surface: var(--color-surface);
+  --color-forest: var(--color-forest);
+  --color-ink: var(--color-ink);
+  --color-taupe: var(--color-taupe);
+  --color-terracotta: var(--color-terracotta);
+  --color-terracotta-dark: var(--color-terracotta-dark);
+  --color-sand: var(--color-sand);
 }
 
 @media (prefers-color-scheme: dark) {

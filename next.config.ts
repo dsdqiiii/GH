@@ -8,6 +8,14 @@ const nextConfig: NextConfig = {
         hostname: "zlkezypthaahtwnluabf.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
+<<<<<<< HEAD
+=======
+      {
+        protocol: "https",
+        hostname: "zlkezypthaahtwnluabf.supabase.co",
+        pathname: "/storage/v1/object/sign/**",
+      },
+>>>>>>> upstream/main
     ],
   },
 };

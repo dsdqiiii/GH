@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { Tables, TablesInsert, TablesUpdate } from "../supabase/supabase";
+=======
+import { Tables, TablesInsert, TablesUpdate } from "./supabase";
+>>>>>>> upstream/main
 
 export type MasterProperties = Tables<'master_properties'>;
 export type MasterPropertiesInsert = TablesInsert<'master_properties'>;

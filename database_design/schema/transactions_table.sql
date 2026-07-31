@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS order_item_addons (
     subtotal numeric(12,2) generated always as (quantity * price_at_booking) stored
 );
 
+-- charges kita agak skip, no charge, hanya persiapan feat/upgrade.
 CREATE TABLE IF NOT EXISTS order_charges (
     id uuid primary key default gen_random_uuid(),
     order_id uuid not null references orders(id) on delete cascade,

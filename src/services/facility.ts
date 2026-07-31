@@ -5,17 +5,24 @@ export async function getPropertyFacilities(
   propertyId: string
 ): Promise<MasterFacility[]> {
   const supabase = await createSupabaseServer();
+<<<<<<< HEAD
 console.log('id', propertyId)
+=======
+
+>>>>>>> upstream/main
   const { data: assignments, error: assignmentError } = await supabase
     .from("facility_assignments")
     .select("facility_id")
     .eq("reference_type", "property")
     .eq("reference_id", propertyId);
 
+<<<<<<< HEAD
 console.log({
   assignments,
   assignmentError,
 });
+=======
+>>>>>>> upstream/main
   if (assignmentError || !assignments || assignments.length === 0) return [];
     
   const facilityIds = assignments.map((row) => row.facility_id);
