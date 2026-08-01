@@ -37,6 +37,7 @@ export default function PropertyGallery({ images, alt }: PropertyGalleryProps) {
         {images.map((img, i) => (
           <Image
             unoptimized
+            
             key={img}
             src={img}
             alt={`${alt} ${i + 1}`}
