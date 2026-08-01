@@ -9,10 +9,18 @@ kamar standard= 'public/GH54/kamar_standard.jpeg'
 kamar VIP= 'public/GH54/kamar_vip.jpeg'
 lorong kamar= 'public/GH54/lorong.jpeg'
 toilet= 'public/GH54/Toilet.jpeg'
-
+ 
 Andalusia Dalam
 Tampak depan andalus dalam= 'public/GHDALAM/03-lorong_kamar.jpeg'
 Kamar Standard= 'public/GHDALAM/kamar_standard.jpeg'
 
+Push GitHub
+ git remote -v  
+git add .
+git commit -m ""
+ git push -u origin main
 
-
+cara update push github dari aqil ke dsdqiiii ()
+git remote -v
+git pull upstream main
+git push origin main
