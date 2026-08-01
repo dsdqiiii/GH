@@ -9,10 +9,12 @@ import { getMainImagesByPropertyId } from "@/services/images";
 
 export default async function FeaturedGuesthouses() {
   const properties = await getProperties();
+  
 
   const propertiesWithImages = await Promise.all(
     properties.map(async (property) => {
       const images = await getMainImagesByPropertyId(property.id);
+
 
       return {
         ...property,
@@ -44,6 +46,8 @@ export default async function FeaturedGuesthouses() {
                   <Image
                     src={property.image}
                     alt={property.name}
+                    unoptimized
+                    priority
                     fill
                     className="object-cover"
                     sizes="(max-width:768px) 100vw, (max-width:1280px) 50vw, 33vw"

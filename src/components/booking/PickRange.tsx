@@ -33,8 +33,10 @@ export default function PickRange({
   );
 
   // State untuk Mode Inap
+  // Selaras dengan RPC: p_check_in (tanggal) + p_duration (malam).
+  // Checkout TIDAK dikirim — backend yang menghitung (checkin 14:00 + N malam, checkout 12:00).
   const [checkIn, setCheckIn] = useState(searchParams.get("checkin") || "");
-  const [checkOut, setCheckOut] = useState(searchParams.get("checkout") || "");
+  const [nights, setNights] = useState(searchParams.get("duration") || "1");
 
   // State untuk Mode Transit
   const [transitDate, setTransitDate] = useState(
@@ -44,13 +46,19 @@ export default function PickRange({
     searchParams.get("time") || "10:00"
   );
   const [durationHours, setDurationHours] = useState(
-    searchParams.get("duration") || "3"
+    searchParams.get("duration") || "1"
   );
 
+  // Tetap ada sebagai input, tapi murni diteruskan sebagai query param —
+  // filtering adult/floor dilakukan di BE, bukan di sini.
   const [adult, setAdult] = useState(searchParams.get("adult") || "1");
   const [floor, setFloor] = useState(searchParams.get("floor") || "");
 
-  function handleSubmit(e: React.FormEvent) {
+  // Batas bawah untuk date picker (hari ini) — sekadar UX guard,
+  // validasi sesungguhnya (cutoff 07:00, lead-time 30 menit) tetap di RPC.
+  const todayStr = new Date().toISOString().split("T")[0];
+
+  function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
 
     const query = new URLSearchParams();
@@ -59,15 +67,15 @@ export default function PickRange({
     if (floor) query.set("floor", floor);
 
     if (bookingType === "inap") {
-      if (checkIn) query.set("checkin", checkIn);
-      if (checkOut) query.set("checkout", checkOut);
+      if (!checkIn) return;
+      query.set("checkin", checkIn); // tanggal saja; jam 14:00 dipaksa di RPC
+      query.set("duration", nights); // malam, sesuai p_duration RPC (1-100)
     } else {
-      if (transitDate) {
-        query.set("checkin", `${transitDate}T${checkInTime}`);
-        query.set("transitDate", transitDate);
-      }
+      if (!transitDate) return;
+      query.set("checkin", `${transitDate}T${checkInTime}`);
+      query.set("transitDate", transitDate);
       query.set("time", checkInTime);
-      query.set("duration", durationHours);
+      query.set("duration", durationHours); // jam, sesuai p_duration RPC (1-5)
     }
 
     const targetSlug = mode === "global" ? selectedSlug : currentSlug;
@@ -141,21 +149,26 @@ export default function PickRange({
               </label>
               <input
                 type="date"
+                min={todayStr}
                 value={checkIn}
                 onChange={(e) => setCheckIn(e.target.value)}
                 className={inputBaseClass}
+                required
               />
             </div>
 
             <div>
               <label className="block text-xs font-medium text-taupe mb-1">
-                Check-out
+                Durasi (Malam)
               </label>
               <input
-                type="date"
-                value={checkOut}
-                onChange={(e) => setCheckOut(e.target.value)}
+                type="number"
+                min={1}
+                max={10}
+                value={nights}
+                onChange={(e) => setNights(e.target.value)}
                 className={inputBaseClass}
+                required
               />
             </div>
           </>
@@ -167,9 +180,11 @@ export default function PickRange({
               </label>
               <input
                 type="date"
+                min={todayStr}
                 value={transitDate}
                 onChange={(e) => setTransitDate(e.target.value)}
                 className={inputBaseClass}
+                required
               />
             </div>
 
@@ -201,13 +216,14 @@ export default function PickRange({
           </>
         )}
 
-        {/* Jumlah Tamu */}
+        {/* Jumlah Tamu — diteruskan ke BE, tidak difilter di client */}
         <div>
           <label className="block text-xs font-medium text-taupe mb-1">
             Tamu (Dewasa)
           </label>
           <input
             type="number"
+            readOnly
             min={1}
             max={20}
             value={adult}
@@ -216,7 +232,7 @@ export default function PickRange({
           />
         </div>
 
-        {/* Filter Lantai dari FLOOR Constant */}
+        {/* Filter Lantai — diteruskan ke BE, tidak difilter di client */}
         <div>
           <label className="block text-xs font-medium text-taupe mb-1">
             Lantai

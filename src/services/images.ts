@@ -78,8 +78,6 @@ export async function getHeroImages(): Promise<HeroImage[]> {
     .from("GH")
     .list("public/HERO");
 
-  console.log(files);
-
   if (error || !files) return [];
 
   return files

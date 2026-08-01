@@ -36,6 +36,7 @@ export default function PropertyGallery({ images, alt }: PropertyGalleryProps) {
       <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "16/9" }}>
         {images.map((img, i) => (
           <Image
+            unoptimized
             key={img}
             src={img}
             alt={`${alt} ${i + 1}`}
@@ -71,6 +72,8 @@ export default function PropertyGallery({ images, alt }: PropertyGalleryProps) {
                 fill
                 sizes="88px"
                 className="object-cover"
+                unoptimized
+                priority
               />
             </button>
           ))}

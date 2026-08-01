@@ -12,8 +12,65 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
+      extended_permissions: {
+        Row: {
+          granted_at: string
+          granted_by: string | null
+          notes: string | null
+          permission_id: number
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string
+          granted_by?: string | null
+          notes?: string | null
+          permission_id: number
+          user_id: string
+        }
+        Update: {
+          granted_at?: string
+          granted_by?: string | null
+          notes?: string | null
+          permission_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extended_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       facility_assignments: {
         Row: {
           facility_id: number
@@ -296,36 +353,6 @@ export type Database = {
           },
         ]
       }
-      master_roles: {
-        Row: {
-          code: string
-          created_at: string
-          description: string | null
-          id: number
-          is_active: boolean
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          code: string
-          created_at?: string
-          description?: string | null
-          id?: never
-          is_active?: boolean
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          code?: string
-          created_at?: string
-          description?: string | null
-          id?: never
-          is_active?: boolean
-          name?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       order_charges: {
         Row: {
           calculated_amount: number
@@ -592,6 +619,27 @@ export type Database = {
           },
         ]
       }
+      permissions: {
+        Row: {
+          category: string | null
+          description: string | null
+          id: number
+          name: string
+        }
+        Insert: {
+          category?: string | null
+          description?: string | null
+          id: number
+          name: string
+        }
+        Update: {
+          category?: string | null
+          description?: string | null
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -612,7 +660,7 @@ export type Database = {
           id: string
           is_active?: boolean
           is_verified?: boolean
-          role_id: number
+          role_id?: number
           suspended_at?: string | null
           suspended_by?: string | null
           suspended_reason?: string | null
@@ -637,7 +685,7 @@ export type Database = {
             foreignKeyName: "profiles_role_id_fkey"
             columns: ["role_id"]
             isOneToOne: false
-            referencedRelation: "master_roles"
+            referencedRelation: "roles"
             referencedColumns: ["id"]
           },
         ]
@@ -719,6 +767,24 @@ export type Database = {
           },
         ]
       }
+      roles: {
+        Row: {
+          description: string | null
+          id: number
+          name: string
+        }
+        Insert: {
+          description?: string | null
+          id: number
+          name: string
+        }
+        Update: {
+          description?: string | null
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       units: {
         Row: {
           base_price_per_night: number
@@ -735,6 +801,7 @@ export type Database = {
           name: string
           price_per_hour: number | null
           slug: string
+          unit_type: string
           updated_at: string
         }
         Insert: {
@@ -752,6 +819,7 @@ export type Database = {
           name: string
           price_per_hour?: number | null
           slug: string
+          unit_type?: string
           updated_at?: string
         }
         Update: {
@@ -769,6 +837,7 @@ export type Database = {
           name?: string
           price_per_hour?: number | null
           slug?: string
+          unit_type?: string
           updated_at?: string
         }
         Relationships: [
@@ -786,47 +855,117 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_booking: {
-        Args: {
-          p_addons?: Json
-          p_booking_type: string
-          p_check_in: string
-          p_check_out: string
-          p_guest_email?: string
-          p_guest_name?: string
-          p_guest_phone?: string
-          p_total_guest: number
-          p_unit_id: string
-          p_user_id?: string
-        }
-        Returns: {
-          booking_code: string
-          order_id: string
-          total_amount: number
-        }[]
-      }
+      create_booking:
+        | {
+            Args: {
+              p_addons?: Json
+              p_booking_type: string
+              p_check_in: string
+              p_check_out: string
+              p_guest_email?: string
+              p_guest_name?: string
+              p_guest_phone?: string
+              p_proof_url: string
+              p_total_guest: number
+              p_unit_id: string
+              p_user_id?: string
+            }
+            Returns: {
+              booking_code: string
+              order_id: string
+              total_amount: number
+            }[]
+          }
+        | {
+            Args: {
+              p_addons?: Json
+              p_booking_type: string
+              p_check_in: string
+              p_check_out: string
+              p_guest_email?: string
+              p_guest_name?: string
+              p_guest_phone?: string
+              p_total_guest: number
+              p_unit_id: string
+              p_user_id?: string
+            }
+            Returns: {
+              booking_code: string
+              order_id: string
+              total_amount: number
+            }[]
+          }
+        | {
+            Args: {
+              p_addons?: Json
+              p_booking_type: string
+              p_check_in: string
+              p_duration: number
+              p_guest_email?: string
+              p_guest_name?: string
+              p_guest_phone?: string
+              p_proof_url: string
+              p_total_guest: number
+              p_unit_id: string
+              p_user_id?: string
+            }
+            Returns: {
+              booking_code: string
+              order_id: string
+              total_amount: number
+            }[]
+          }
+      current_role_id: { Args: never; Returns: number }
       generate_booking_code: { Args: never; Returns: string }
-      get_available_units: {
-        Args: {
-          p_check_in: string
-          p_check_out: string
-          p_property_id: string
-          p_type_booking?: string
-        }
-        Returns: {
-          base_price_per_night: number
-          capacity: number
-          descriptions: string
-          floor: string
-          id: string
-          is_active: boolean
-          is_transit_enabled: boolean
-          master_properties_id: string
-          name: string
-          price_per_hour: number
-          slug: string
-        }[]
+      get_available_units:
+        | {
+            Args: {
+              p_check_in: string
+              p_check_out: string
+              p_property_id: string
+              p_type_booking?: string
+            }
+            Returns: {
+              base_price_per_night: number
+              capacity: number
+              descriptions: string
+              floor: string
+              id: string
+              is_active: boolean
+              is_transit_enabled: boolean
+              master_properties_id: string
+              name: string
+              price_per_hour: number
+              slug: string
+            }[]
+          }
+        | {
+            Args: {
+              p_adult?: number
+              p_check_in: string
+              p_duration?: number
+              p_property_id: string
+              p_type_booking?: string
+            }
+            Returns: {
+              base_price_per_night: number
+              capacity: number
+              descriptions: string
+              floor: string
+              id: string
+              is_active: boolean
+              is_transit_enabled: boolean
+              master_properties_id: string
+              name: string
+              price_per_hour: number
+              slug: string
+            }[]
+          }
+      has_extended_permission: {
+        Args: { p_permission_name: string }
+        Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
@@ -955,6 +1094,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

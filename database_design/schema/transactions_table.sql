@@ -40,7 +40,19 @@ CREATE TABLE IF NOT EXISTS order_items (
     check (
     type_booking <> 'transit'
     or (check_out - check_in) between interval '1 hour' and interval '5 hours'
-    )
+    ),
+     
+    -- todo: alter table order_items
+    -- constraint logic_order_status_canceled_at_snapshoot
+    -- check (
+    --     cancelled_at is not null or status_item not in ('CANCELLED', 'EXPIRED')
+    -- )
+    -- constraint sync_cancelled_at_cancelled_by 
+    -- check (
+    --     (cancelled_by is not null and cancelled_at is not null)
+    --     or cancelled_at is null
+    -- )
+    
 );
 
 CREATE TABLE IF NOT EXISTS order_item_addons (
@@ -53,16 +65,17 @@ CREATE TABLE IF NOT EXISTS order_item_addons (
 );
 
 -- charges kita agak skip, no charge, hanya persiapan feat/upgrade.
-CREATE TABLE IF NOT EXISTS order_charges (
-    id uuid primary key default gen_random_uuid(),
-    order_id uuid not null references orders(id) on delete cascade,
-    charge_id smallint references master_charges(id) on delete set null,
-    charge_name varchar(100) not null,
-    charge_type text not null check (charge_type in ('percentage', 'flat')),
-    charge_value numeric(12,2) not null,
-    calculated_amount numeric(12,2) not null check (calculated_amount >= 0),  
-    created_at timestamptz not null default now()
-);
+-- tidak usah dulu.
+-- CREATE TABLE IF NOT EXISTS order_charges (
+--     id uuid primary key default gen_random_uuid(),
+--     order_id uuid not null references orders(id) on delete cascade,
+--     charge_id smallint references master_charges(id) on delete set null,
+--     charge_name varchar(100) not null,
+--     charge_type text not null check (charge_type in ('percentage', 'flat')),
+--     charge_value numeric(12,2) not null,
+--     calculated_amount numeric(12,2) not null check (calculated_amount >= 0),  
+--     created_at timestamptz not null default now()
+-- );
 
 CREATE TABLE IF NOT EXISTS payments (
     id uuid primary key default gen_random_uuid(),

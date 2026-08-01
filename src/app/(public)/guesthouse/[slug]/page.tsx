@@ -35,7 +35,7 @@ export default async function PropertiPage({
 
   if (!property) {
     return notFound();
-  }
+  } 
 
   const hasDateFilter = Boolean(sp.checkin && sp.checkout);
 

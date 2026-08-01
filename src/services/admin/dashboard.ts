@@ -39,7 +39,6 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
   if (pendingOrdersRes.error) throw pendingOrdersRes.error;
   if (pendingPaymentsRes.error) throw pendingPaymentsRes.error;
 
-  console.log(pendingPaymentsRes)
 
   return {
     bookingHariIni: bookingHariIniRes.count ?? 0,

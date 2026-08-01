@@ -1,5 +1,5 @@
 import type { PropertyMasterAddons } from "@/lib/types/main";
-import type { FormState, FormErrors, BookingType } from "@/lib/types/booking.types";
+import type { FormState, FormErrors, BookingType, ResolveBookingWindowInput, ResolveBookingWindowResult, BuildBookingPayloadInput } from "@/lib/types/booking.types";
 
 export const initialBookingState: FormState = {
   totalGuest: 1,
@@ -90,36 +90,6 @@ export function formatDateKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-export interface ResolveBookingWindowInput {
-  /** Tanggal check-in dalam format YYYY-MM-DD */
-  checkInDate: string;
-  /** Tanggal check-out dalam format YYYY-MM-DD */
-  checkOutDate: string;
-  /** Jam standar check-in property (misal: "14:00") */
-  defaultCheckInTime?: string;
-  /** Jam standar check-out property (misal: "12:00") */
-  defaultCheckOutTime?: string;
-  /** Cutoff jam pemesanan hari H (misal: "17:00" - lewat jam ini tidak bisa pesan untuk hari yang sama) */
-  sameDayCutoffTime?: string;
-  /** Waktu acuan saat ini (default: Date.now(), berguna untuk unit testing) */
-  now?: Date;
-}
-
-export interface ResolveBookingWindowResult {
-  isValid: boolean;
-  /** ISO String lengkap dengan jam untuk DB / RPC query (contoh: "2026-07-30T14:00:00.000Z") */
-  checkInISO: string;
-  /** ISO String lengkap untuk check-out */
-  checkOutISO: string;
-  /** Total malam menginap */
-  totalNights: number;
-  /** Alasan jika validasi gagal */
-  errorMessage?: string;
-}
-
-/**
- * Single source of truth untuk menghitung window check-in/check-out dan memvalidasi cutoff.
- */
 export function resolveBookingWindow(
   input: ResolveBookingWindowInput
 ): ResolveBookingWindowResult {
@@ -141,7 +111,7 @@ export function resolveBookingWindow(
   const checkInMidnight = new Date(checkIn.getFullYear(), checkIn.getMonth(), checkIn.getDate());
 
   // 2. Validation Checks
-  
+
   // A. Pastikan format date valid
   if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
     return createErrorResult("Format tanggal check-in atau check-out tidak valid.");
@@ -195,5 +165,37 @@ function createErrorResult(errorMessage: string): ResolveBookingWindowResult {
     checkOutISO: "",
     totalNights: 0,
     errorMessage,
+  };
+}
+
+export function buildBookingPayload({
+  unitId,
+  bookingType,
+  checkIn,
+  duration,
+  proofUrl,
+  form,
+  isLoggedIn,
+}: BuildBookingPayloadInput) {
+  return {
+    unitId,
+    bookingType,
+    checkIn,
+    duration,
+    totalGuest: form.totalGuest,
+    proofUrl,
+    ...(isLoggedIn
+      ? {}
+      : {
+          guestName: form.guestName,
+          guestPhone: form.guestPhone,
+          guestEmail: form.guestEmail || undefined,
+        }),
+    addons: Object.entries(form.selectedAddons).map(
+      ([propertyAddonId, quantity]) => ({
+        propertyAddonId,
+        quantity,
+      })
+    ),
   };
 }

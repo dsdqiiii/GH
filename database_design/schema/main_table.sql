@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS units (
     master_properties_id uuid not null references master_properties(id) on delete cascade,
     name text not null,
     slug varchar(255) not null,
+    unit_type varchar(20) not null default 'Standard' check (unit_type in ('VIP', 'Standard', 'Jamaah')),
     base_price_per_night numeric(12,2) not null check (base_price_per_night >= 0),
     price_per_hour numeric(12,2) check (price_per_hour is null or price_per_hour >= 0),
     is_transit_enabled boolean not null default false,

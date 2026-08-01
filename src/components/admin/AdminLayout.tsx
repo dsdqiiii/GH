@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Sidebar from "./Sidebar";
+import {Sidebar} from "./Sidebar";
 
 export default function AdminLayout({
   children,
@@ -16,8 +16,7 @@ export default function AdminLayout({
       {/* Desktop Sidebar */}
       <div className="hidden sm:block bg-blue-600">
         <Sidebar
-          collapsed={collapsed}
-          setCollapsed={setCollapsed}
+          
         />
       </div>
 
@@ -30,9 +29,7 @@ export default function AdminLayout({
           />
           <div className="absolute left-0 top-0 h-full">
             <Sidebar
-              collapsed={false}
-              mobile
-              closeMobile={() => setMobileOpen(false)}
+              
             />
           </div>
         </div>

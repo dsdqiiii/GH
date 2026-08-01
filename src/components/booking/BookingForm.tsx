@@ -1,32 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/core/button";
 import { FileUpload } from "@/components/booking/FileUpload";
-import type {
-  BookingFormProps,
-  FormState,
-  FormErrors,
-  BookingPayload,
-} from "@/lib/types/booking.types";
-import {
-  initialBookingState,
-  calculateNights,
-  calculateRoomSubtotal,
-  calculateAddonSubtotal,
-  validateBookingForm,
-} from "@/utils/booking.utils";
-import { createBooking } from "@/actions/bookings";
-
-function formatDateDisplay(iso: string) {
-  return new Date(iso).toLocaleString("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+import type { BookingFormProps } from "@/lib/types/booking.types";
+import { formatDateDisplay } from "@/utils/formatter.utils";
+import { useBookingForm } from "@/hooks/useBookingForm";
 
 export default function BookingForm({
   unitId,
@@ -40,108 +18,43 @@ export default function BookingForm({
   checkOut,
   bookingType,
 }: BookingFormProps) {
-  const [form, setForm] = useState<FormState>(initialBookingState);
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    form,
+    errors,
+    isSubmitting,
+    submitStage,
+    proofFile,
+    fileError,
+    submitError,
+    nights,
+    durationHours,
+    roomSubtotal,
+    addonSubtotal,
+    total,
+    updateField,
+    updateProofFile,
+    handleSubmit,
+  } = useBookingForm({
+    unitId,
+    pricePerNight,
+    pricePerHour,
+    isLoggedIn,
+    checkIn,
+    checkOut,
+    bookingType,
+    addons,
+  });
 
-  // State terpisah untuk menampung file upload identitas/bukti
-  const [identityFile, setIdentityFile] = useState<File | null>(null);
-  const [fileError, setFileError] = useState<string | null>(null);
-
-  function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }));
-    setErrors((prev) => ({ ...prev, [key]: undefined }));
-  }
-
-  // Helper untuk scroll ke PickRange di sidebar atas
   function handleScrollToSidebarPicker() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  const nights =
-    bookingType === "inap"
-      ? calculateNights(new Date(checkIn), new Date(checkOut))
-      : 0;
-
-  const durationHours =
-    bookingType === "transit"
-      ? Math.round(
-          (new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
-            (1000 * 60 * 60)
-        )
-      : 0;
-
-  const roomSubtotal = calculateRoomSubtotal(
-    bookingType,
-    nights,
-    durationHours,
-    pricePerNight,
-    pricePerHour
-  );
-  const addonSubtotal = calculateAddonSubtotal(form, addons, nights);
-  const total = roomSubtotal + addonSubtotal;
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    // 1. Validasi form biasa
-    const validationErrors = validateBookingForm(form, isLoggedIn);
-    setErrors(validationErrors);
-
-    // Optional: Validasi file identitas jika wajib bagi guest (non-logged in)
-    if (!isLoggedIn && !identityFile) {
-      setFileError("Silakan unggah foto identitas (KTP/SIM) terlebih dahulu");
-      if (Object.keys(validationErrors).length > 0) return;
-      return;
-    } else {
-      setFileError(null);
-    }
-
-    if (Object.keys(validationErrors).length > 0) return;
-
-    setIsSubmitting(true);
-
-    // 2. Dummy Process Upload File
-    let uploadedFileUrl: string | null = null;
-    if (identityFile) {
-      console.log("[DUMMY UPLOAD] Memproses upload file:", identityFile.name);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      uploadedFileUrl = `https://dummy-storage.local/uploads/${Date.now()}_${identityFile.name}`;
-      console.log("[DUMMY UPLOAD] File berhasil diunggah ke:", uploadedFileUrl);
-    }
-
-    // 3. Menyiapkan payload booking
-    const payload: BookingPayload = {
-      unitId,
-      bookingType,
-      checkIn,
-      checkOut,
-      totalGuest: form.totalGuest,
-      guest: isLoggedIn
-        ? null
-        : {
-            name: form.guestName,
-            phone: form.guestPhone,
-            email: form.guestEmail || null,
-          },
-      addons: Object.entries(form.selectedAddons).map(
-        ([propertyAddonId, quantity]) => ({
-          propertyAddonId,
-          quantity,
-        })
-      ),
-    };
-
-    console.log("[DUMMY BOOKING SUBMIT]", payload);
-
-    const userId = undefined;
-
-    // 4. Kirim data ke backend / Server Action
-    const result = await createBooking(payload, userId);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    setIsSubmitting(false);
-  }
+  const submitLabel =
+    submitStage === "uploading"
+      ? "Mengunggah bukti..."
+      : submitStage === "booking"
+        ? "Membuat booking..."
+        : "Lanjutkan Booking";
 
   return (
     <form
@@ -157,7 +70,6 @@ export default function BookingForm({
         </p>
       </div>
 
-      {/* Ringkasan tanggal — read-only */}
       <div className="rounded-lg border border-sand bg-white p-4 flex items-center justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-wide text-taupe mb-1">
@@ -176,7 +88,6 @@ export default function BookingForm({
           )}
         </div>
 
-        {/* Klik tombol ini untuk scroll kembali ke PickRange di sidebar */}
         <Button
           type="button"
           variant="ghost"
@@ -302,7 +213,6 @@ export default function BookingForm({
         </div>
       )}
 
-      {/* Summary Total Harga */}
       <div className="border-t border-sand pt-3 space-y-1">
         <p className="text-sm text-taupe">
           Kamar: Rp {roomSubtotal.toLocaleString("id-ID")}
@@ -315,21 +225,20 @@ export default function BookingForm({
         </p>
       </div>
 
-      {/* Upload File (khusus guest non-logged in) */}
-      {!isLoggedIn && (
-        <div className="border-t border-sand pt-4">
-          <FileUpload
-            label="Upload Bukti Pembayaran"
-            accept="image/jpeg,image/png,application/pdf,.pdf"
-            maxSizeMB={2}
-            value={identityFile}
-            onChange={(file) => {
-              setIdentityFile(file);
-              if (file) setFileError(null);
-            }}
-            error={fileError || undefined}
-          />
-        </div>
+      <div className="border-t border-sand pt-4">
+        <FileUpload
+          label="Upload Bukti Pembayaran"
+          accept="image/jpeg,image/png,image/webp,application/pdf,.pdf"
+          maxSizeMB={2}
+          value={proofFile}
+          disabled={isSubmitting}
+          onChange={updateProofFile}
+          error={fileError || undefined}
+        />
+      </div>
+
+      {submitError && (
+        <p className="text-sm text-red-500 text-center">{submitError}</p>
       )}
 
       <Button
@@ -338,7 +247,7 @@ export default function BookingForm({
         variant="brand"
         isLoading={isSubmitting}
       >
-        {isSubmitting ? "Memproses..." : "Lanjutkan Booking"}
+        {submitLabel}
       </Button>
     </form>
   );

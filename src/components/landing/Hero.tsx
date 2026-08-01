@@ -23,6 +23,7 @@ export default function Hero({ images }: HeroProps) {
       <div className="absolute inset-0">
         {images.map((img, i) => (
           <Image
+            unoptimized
             key={img}
             src={img}
             alt="Guest House Andalusia"
