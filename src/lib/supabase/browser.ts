@@ -3,18 +3,16 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../types/supabase";
 
-export function createSupabaseBrowser() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 
-  if (!url || !key) {
-    throw new Error("Missing Supabase environment variables (browser)");
-  }
-
-  return createClient<Database>(url, key, {
-    auth: {
-      detectSessionInUrl: true,
-      flowType: "implicit",
-    },
-  });
+if (!url || !key) {
+  throw new Error("Missing Supabase environment variables (browser)");
 }
+
+export const supabaseBrowser = createClient<Database>(url, key, {
+  auth: {
+    detectSessionInUrl: true,
+    flowType: "implicit",
+  },
+});
