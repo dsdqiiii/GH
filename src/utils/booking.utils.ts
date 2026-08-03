@@ -1,5 +1,12 @@
 import type { PropertyMasterAddons } from "@/lib/types/main";
-import type { FormState, FormErrors, BookingType, ResolveBookingWindowInput, ResolveBookingWindowResult, BuildBookingPayloadInput } from "@/lib/types/booking.types";
+import type {
+  FormState,
+  FormErrors,
+  BookingType,
+  ResolveBookingWindowInput,
+  ResolveBookingWindowResult,
+  BuildBookingPayloadInput,
+} from "@/lib/types/booking.types";
 
 export const initialBookingState: FormState = {
   totalGuest: 1,
@@ -8,13 +15,6 @@ export const initialBookingState: FormState = {
   guestEmail: "",
   selectedAddons: {},
 };
-
-// Hitung jumlah malam dari checkIn dan checkOut
-export function calculateNights(checkIn: Date, checkOut: Date): number {
-  const diffTime = checkOut.getTime() - checkIn.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return Math.max(0, diffDays);
-}
 
 export function calculateRoomSubtotal(
   bookingType: BookingType,
@@ -81,8 +81,7 @@ export function validateBookingForm(
   return errors;
 }
 
-// Format Date ke string "YYYY-MM-DD" — sudah tidak dipakai BookingForm,
-// dipertahankan untuk kemungkinan reuse (mis. admin calendar)
+// Format Date ke string "YYYY-MM-DD" — dipertahankan untuk kemungkinan reuse (mis. admin calendar)
 export function formatDateKey(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -90,72 +89,45 @@ export function formatDateKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Menghitung checkInISO/checkOutISO untuk keperluan DISPLAY di FE saja.
+ * Bukan sumber validasi — cutoff, lead-time, dan batas durasi
+ * sepenuhnya divalidasi oleh RPC (get_available_units / create_booking).
+ * duration = malam (inap) atau jam (transit), sesuai p_duration RPC.
+ */
 export function resolveBookingWindow(
   input: ResolveBookingWindowInput
 ): ResolveBookingWindowResult {
   const {
-    checkInDate,
-    checkOutDate,
+    checkIn: checkInRaw,
+    duration,
+    bookingType,
     defaultCheckInTime = "14:00",
-    defaultCheckOutTime = "12:00",
-    sameDayCutoffTime = "20:00",
-    now = new Date(),
   } = input;
 
-  // 1. Construct Full DateTime Objects
-  const checkIn = new Date(`${checkInDate}T${defaultCheckInTime}:00`);
-  const checkOut = new Date(`${checkOutDate}T${defaultCheckOutTime}:00`);
+  let checkIn: Date;
+  let checkOut: Date;
 
-  // Helper untuk normalisasi tanggal tanpa jam (Midnight)
-  const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const checkInMidnight = new Date(checkIn.getFullYear(), checkIn.getMonth(), checkIn.getDate());
+  if (bookingType === "inap") {
+    checkIn = new Date(`${checkInRaw}T${defaultCheckInTime}:00`);
+    checkOut = new Date(checkIn);
+    checkOut.setDate(checkOut.getDate() + duration);
+    checkOut.setHours(12, 0, 0, 0);
+  } else {
+    // transit: checkInRaw sudah berupa "YYYY-MM-DDTHH:mm"
+    checkIn = new Date(checkInRaw);
+    checkOut = new Date(checkIn.getTime() + duration * 60 * 60 * 1000);
+  }
 
-  // 2. Validation Checks
-
-  // A. Pastikan format date valid
   if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
-    return createErrorResult("Format tanggal check-in atau check-out tidak valid.");
+    return createErrorResult("Format tanggal atau durasi tidak valid.");
   }
-
-  // B. Tanggal check-in tidak boleh di masa lalu
-  if (checkInMidnight < todayMidnight) {
-    return createErrorResult("Tanggal check-in tidak boleh berada di masa lalu.");
-  }
-
-  // C. Check-out harus setelah Check-in
-  if (checkOut <= checkIn) {
-    return createErrorResult("Tanggal check-out harus setelah tanggal check-in.");
-  }
-
-  // D. Same-Day Cutoff Validation (Jika booking untuk hari ini)
-  const isSameDayBooking = checkInMidnight.getTime() === todayMidnight.getTime();
-  if (isSameDayBooking && sameDayCutoffTime) {
-    const [cutoffHour, cutoffMinute] = sameDayCutoffTime.split(":").map(Number);
-    const cutoffDateTime = new Date(todayMidnight);
-    cutoffDateTime.setHours(cutoffHour, cutoffMinute, 0, 0);
-
-    if (now > cutoffDateTime) {
-      return createErrorResult(
-        `Batas waktu pemesanan untuk hari ini telah berakhir pada pukul ${sameDayCutoffTime}.`
-      );
-    }
-  }
-
-  // 3. Calculate Total Nights
-  const diffMS = checkOutMidnight(checkOut).getTime() - checkInMidnight.getTime();
-  const totalNights = Math.round(diffMS / (1000 * 60 * 60 * 24));
 
   return {
     isValid: true,
     checkInISO: checkIn.toISOString(),
     checkOutISO: checkOut.toISOString(),
-    totalNights,
   };
-}
-
-// Internal Helpers
-function checkOutMidnight(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
 function createErrorResult(errorMessage: string): ResolveBookingWindowResult {
@@ -163,7 +135,6 @@ function createErrorResult(errorMessage: string): ResolveBookingWindowResult {
     isValid: false,
     checkInISO: "",
     checkOutISO: "",
-    totalNights: 0,
     errorMessage,
   };
 }

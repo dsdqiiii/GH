@@ -15,7 +15,7 @@ export default function BookingForm({
   addons,
   isLoggedIn = false,
   checkIn,
-  checkOut,
+  duration,
   bookingType,
 }: BookingFormProps) {
   const {
@@ -40,7 +40,7 @@ export default function BookingForm({
     pricePerHour,
     isLoggedIn,
     checkIn,
-    checkOut,
+    duration,
     bookingType,
     addons,
   });
@@ -73,12 +73,10 @@ export default function BookingForm({
       <div className="rounded-lg border border-sand bg-white p-4 flex items-center justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-wide text-taupe mb-1">
-            {bookingType === "inap"
-              ? "Check-in — Check-out"
-              : "Tanggal Transit"}
+            {bookingType === "inap" ? "Check-in" : "Tanggal Transit"}
           </p>
           <p className="text-sm font-medium text-forest">
-            {formatDateDisplay(checkIn)} → {formatDateDisplay(checkOut)}
+            {formatDateDisplay(checkIn)}
           </p>
           {bookingType === "inap" && nights > 0 && (
             <p className="text-xs text-taupe mt-1">{nights} malam</p>

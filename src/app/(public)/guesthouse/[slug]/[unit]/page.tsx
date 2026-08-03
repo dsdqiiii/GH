@@ -25,13 +25,20 @@ export default async function UnitPage({
   params: Promise<{ slug: string; unit: string }>;
   searchParams: Promise<{
     checkin?: string;
-    checkout?: string;
+    duration?: string;
     adult?: string;
+    floor?: string;
     type?: TypeBooking;
   }>;
 }) {
   const { slug, unit: unitSlug } = await params;
   const sp = await searchParams;
+
+  console.log({
+  slug,
+  unitSlug,
+  searchParams: sp,
+});
 
   const [property, unit] = await Promise.all([
     getPropertyBySlug(slug),
@@ -42,27 +49,27 @@ export default async function UnitPage({
     return notFound();
   }
 
-  const hasDateRange = Boolean(sp.checkin && sp.checkout);
+  const hasDateRange = Boolean(sp.checkin && sp.duration);
 
   // Re-validasi ketersediaan unit jika ada filter tanggal
   if (hasDateRange) {
     const availableUnits = await getAvailableUnits({
       propertyId: property.id,
       checkIn: sp.checkin!,
-      checkOut: sp.checkout!,
+      duration: Number(sp.duration),
       typeBooking: sp.type ?? "inap",
     });
 
     const stillAvailable = availableUnits.some((u) => u.id === unit.id);
 
     if (!stillAvailable) {
-      const params = new URLSearchParams();
-      params.set("checkin", sp.checkin!);
-      params.set("checkout", sp.checkout!);
-      if (sp.adult) params.set("adult", sp.adult);
-      if (sp.type) params.set("type", sp.type);
+      const urlParams = new URLSearchParams();
+      urlParams.set("checkin", sp.checkin!);
+      urlParams.set("duration", sp.duration!);
+      if (sp.adult) urlParams.set("adult", sp.adult);
+      if (sp.type) urlParams.set("type", sp.type);
 
-      redirect(`/guesthouse/${slug}?${params.toString()}`);
+      redirect(`/guesthouse/${slug}?${urlParams.toString()}`);
     }
   }
 
@@ -72,13 +79,15 @@ export default async function UnitPage({
     getPropertyAddons(property.id),
   ]);
 
+  console.log(images, facilities, addons);
+
   const pricePerNight = Number(unit.base_price_per_night ?? 0);
 
   return (
     <PageShell>
       {/* Container Utama */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 space-y-8 sm:space-y-10">
-        
+
         {/* Header */}
         <section>
           <PageHeader eyebrow={property.name} title={unit.name} />
@@ -86,7 +95,7 @@ export default async function UnitPage({
 
         {/* Top Hero Section: Galeri (Kiri) & Sticky PickRange (Kanan) */}
         <section className="grid grid-cols-1 lg:grid-cols-[1fr_360px] xl:grid-cols-[1fr_400px] gap-6 xl:gap-8 items-start">
-          
+
           {/* Main Content Kiri: Galeri Foto */}
           <div className="w-full min-w-0">
             <PropertyGallery images={images} alt={unit.name} />
@@ -114,7 +123,7 @@ export default async function UnitPage({
 
         {/* Bottom Section: Informasi Detail & Form Booking */}
         <section className="border-t border-sand/60 pt-8 sm:pt-10 pb-12 space-y-10">
-          
+
           {/* Deskripsi & Fasilitas Kamar */}
           {(unit.descriptions || facilities.length > 0) && (
             <div className="max-w-4xl space-y-8">
@@ -161,7 +170,7 @@ export default async function UnitPage({
                 addons={addons}
                 isLoggedIn={false}
                 checkIn={sp.checkin!}
-                checkOut={sp.checkout!}
+                duration={Number(sp.duration)}
                 bookingType={sp.type ?? "inap"}
               />
             </div>

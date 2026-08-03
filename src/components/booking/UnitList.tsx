@@ -3,7 +3,7 @@ import UnitCard, { type UnitCardData } from "./UnitCard";
 
 interface SearchQuery {
   checkin?: string;
-  checkout?: string;
+  duration?: string;
   adult?: string;
   floor?: string;
   type?: string;
