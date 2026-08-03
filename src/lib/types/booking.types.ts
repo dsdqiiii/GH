@@ -13,7 +13,7 @@ export interface BookingFormProps {
   bookedDates?: string[];
 
   checkIn: string;
-  checkOut: string;
+  duration: number;
   bookingType: BookingType;
 }
 
@@ -57,16 +57,13 @@ export interface BookingPayload {
 }
 
 export interface ResolveBookingWindowInput {
-  /** Tanggal check-in dalam format YYYY-MM-DD */
-  checkInDate: string;
-  /** Tanggal check-out dalam format YYYY-MM-DD */
-  checkOutDate: string;
-  /** Jam standar check-in property (misal: "14:00") */
+  /** Tanggal/waktu check-in. Untuk inap: YYYY-MM-DD. Untuk transit: ISO datetime lokal (YYYY-MM-DDTHH:mm). */
+  checkIn: string;
+  /** Durasi: malam untuk inap (1-100), jam untuk transit (1-5) */
+  duration: number;
+  bookingType: BookingType;
+  /** Jam standar check-in property untuk inap (misal: "14:00") */
   defaultCheckInTime?: string;
-  /** Jam standar check-out property (misal: "12:00") */
-  defaultCheckOutTime?: string;
-  /** Cutoff jam pemesanan hari H (misal: "17:00" - lewat jam ini tidak bisa pesan untuk hari yang sama) */
-  sameDayCutoffTime?: string;
   /** Waktu acuan saat ini (default: Date.now(), berguna untuk unit testing) */
   now?: Date;
 }
@@ -75,10 +72,8 @@ export interface ResolveBookingWindowResult {
   isValid: boolean;
   /** ISO String lengkap dengan jam untuk DB / RPC query (contoh: "2026-07-30T14:00:00.000Z") */
   checkInISO: string;
-  /** ISO String lengkap untuk check-out */
+  /** ISO String lengkap untuk check-out — dihitung, hanya untuk display/estimasi di FE, bukan dikirim ke RPC */
   checkOutISO: string;
-  /** Total malam menginap */
-  totalNights: number;
   /** Alasan jika validasi gagal */
   errorMessage?: string;
 }

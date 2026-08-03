@@ -7,7 +7,6 @@ import type {
 } from "@/lib/types/booking.types";
 import {
   initialBookingState,
-  calculateNights,
   calculateRoomSubtotal,
   calculateAddonSubtotal,
   validateBookingForm,
@@ -25,7 +24,7 @@ type UseBookingFormArgs = Pick<
   | "pricePerHour"
   | "isLoggedIn"
   | "checkIn"
-  | "checkOut"
+  | "duration"
   | "bookingType"
   | "addons"
 >;
@@ -36,9 +35,9 @@ export function useBookingForm({
   pricePerHour,
   isLoggedIn = false,
   checkIn,
-  checkOut,
+  duration,
   bookingType,
-  addons,
+  addons = [], // defensive default: prevents crash if parent hasn't loaded/passed addons yet
 }: UseBookingFormArgs) {
   const [form, setForm] = useState<FormState>(initialBookingState);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -62,20 +61,10 @@ export function useBookingForm({
     if (file) setFileError(null);
   }
 
-  const nights =
-    bookingType === "inap"
-      ? calculateNights(new Date(checkIn), new Date(checkOut))
-      : 0;
-
-  const durationHours =
-    bookingType === "transit"
-      ? Math.round(
-          (new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
-            (1000 * 60 * 60)
-        )
-      : 0;
-
-  const duration = bookingType === "inap" ? nights : durationHours;
+  // duration adalah source of truth (malam untuk inap, jam untuk transit),
+  // bukan lagi dihitung dari selisih checkIn/checkOut.
+  const nights = bookingType === "inap" ? duration : 0;
+  const durationHours = bookingType === "transit" ? duration : 0;
 
   const roomSubtotal = calculateRoomSubtotal(
     bookingType,

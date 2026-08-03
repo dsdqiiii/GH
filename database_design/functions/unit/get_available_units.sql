@@ -3,7 +3,7 @@ create or replace function public.get_available_units(
   p_check_in timestamptz,
   p_duration int default 1,
   p_type_booking text default 'inap',
-  p_adult int default 2 -- koma dihapus dari baris ini
+  p_adult int default 2
 )
 returns table (
   id uuid,
@@ -37,18 +37,16 @@ begin
     raise exception 'p_type_booking tidak valid: %', p_type_booking;
   end if;
 
-  -- validasi range duration sesuai tipe booking
   if p_type_booking = 'transit' then
     if v_duration < 1 or v_duration > 5 then
       raise exception 'duration transit harus antara 1-5 jam, diterima: %', v_duration;
     end if;
-  else -- inap
+  else
     if v_duration < 1 or v_duration > 100 then
       raise exception 'duration inap harus antara 1-100 malam, diterima: %', v_duration;
     end if;
   end if;
 
-  -- normalisasi check_in & hitung check_out
   if p_type_booking = 'inap' then
     v_check_in  := date_trunc('day', p_check_in) + interval '14 hours';
     v_check_out := date_trunc('day', v_check_in) + (v_duration || ' days')::interval + interval '12 hours';
@@ -57,22 +55,15 @@ begin
     v_check_out := v_check_in + (v_duration || ' hours')::interval;
   end if;
 
-  -- batas maksimal booking ke depan (berlaku untuk kedua tipe)
   if v_check_in > now() + v_max_horizon then
     raise exception 'check-in tidak boleh lebih dari % ke depan', v_max_horizon;
   end if;
 
-  -- validasi temporal khusus per tipe (menggantikan cek "masa lalu" generik)
   if p_type_booking = 'inap' then
-    -- cutoff same-day: booking untuk tanggal check-in D masih boleh
-    -- sampai pukul 07.00 keesokan harinya (D+1 07:00). Ini juga otomatis
-    -- menolak tanggal yang sudah benar-benar lewat (D jauh di masa lalu).
     if now() >= date_trunc('day', v_check_in) + interval '1 day' + interval '7 hours' then
       raise exception 'sudah melewati batas waktu booking untuk tanggal check-in tersebut (cutoff 07:00 keesokan harinya)';
     end if;
   else
-    -- transit: request harus masuk minimal 30 menit sebelum jam check-in.
-    -- ini juga otomatis menolak check_in yang sudah lewat.
     if now() >= v_check_in - v_transit_min_lead then
       raise exception 'booking transit harus dilakukan minimal % sebelum check-in', v_transit_min_lead;
     end if;
@@ -82,14 +73,14 @@ begin
   select
     u.id,
     u.master_properties_id,
-    u.name,
-    u.slug,
+    u.name::text,
+    u.slug::text,
     u.base_price_per_night,
     u.price_per_hour,
     u.is_transit_enabled,
     u.capacity,
-    u.floor,
-    u.descriptions,
+    u.floor::text,
+    u.descriptions::text,
     u.is_active
   from units u
   where
@@ -115,7 +106,6 @@ begin
 end;
 $$;
 
--- menyertakan signature parameter lengkap agar tidak terbentur error 42725 (ambiguous)
 revoke execute on function public.get_available_units(
   uuid, timestamptz, int, text, int
 ) from public;
