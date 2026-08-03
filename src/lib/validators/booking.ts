@@ -58,8 +58,10 @@ const phoneSchema = z
 const emailSchema = z.email("Must be a valid email address").max(255).trim();
 
 const proofUrlSchema = z
-  .url("proof_url must be a valid URL")
-  .max(2048, "proof_url is too long");
+  .string()
+  .trim()
+  .min(1, "proof_path is required")
+  .max(1024, "proof_path is too long");
 
 const bookingTypeSchema = z.enum(["inap", "transit"], {
   error: "booking_type must be either 'inap' or 'transit'",

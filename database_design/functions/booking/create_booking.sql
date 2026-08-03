@@ -269,7 +269,7 @@ begin
         using errcode = 'P0004';
     end if;
 
-    if v_property_addon.code <> 'extra_bed' then
+    if v_property_addon.code <> 'EXTRA_BED' then
       raise exception 'Only extra_bed addon is supported for now'
         using errcode = 'P0004';
     end if;
