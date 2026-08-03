@@ -1,0 +1,260 @@
+erDiagram
+    %% ============================================================
+    %% ERD - Sistem Booking Properti (Guest House)
+    %% Skema: database_design/schema/ + database_design/init/init.sql
+    %% Buka di: https://mermaid.live
+    %% ============================================================
+
+    AUTH_USERS ||--o| PROFILES : "memiliki"
+    AUTH_USERS ||--o{ PROPERTY_ASSIGNMENTS : "dipetakan"
+    AUTH_USERS ||--o{ EXTENDED_PERMISSIONS : "diberi"
+    AUTH_USERS ||--o{ ORDER_ITEMS : "cancelled/checked"
+
+    MASTER_ROLES ||--o{ PROFILES : "role"
+
+    MASTER_ORGANIZATIONS ||--o{ MASTER_PROPERTIES : "memiliki"
+    MASTER_ORGANIZATIONS ||--o{ MASTER_BANK_ACCOUNTS : "memiliki"
+    MASTER_ORGANIZATIONS ||--o{ GALLERIES : "galeri (polimorfik)"
+
+    MASTER_PROPERTIES ||--o{ UNITS : "memiliki"
+    MASTER_PROPERTIES ||--o{ PROPERTY_ASSIGNMENTS : "dipetakan"
+    MASTER_PROPERTIES ||--o{ PROPERTY_ADDONS : "addon"
+    MASTER_PROPERTIES ||--o{ GALLERIES : "galeri (polimorfik)"
+    MASTER_PROPERTIES ||--o{ FACILITY_ASSIGNMENTS : "fasilitas (polimorfik)"
+
+    UNITS ||--o{ ORDER_ITEMS : "dibooking"
+    UNITS ||--o{ GALLERIES : "galeri (polimorfik)"
+    UNITS ||--o{ FACILITY_ASSIGNMENTS : "fasilitas (polimorfik)"
+
+    MASTER_ADDONS ||--o{ PROPERTY_ADDONS : "dipasang"
+    MASTER_ADDONS ||--o{ ORDER_ITEM_ADDONS : "dipesan"
+
+    MASTER_FACILITIES ||--o{ FACILITY_ASSIGNMENTS : "dipasang"
+
+    ORDERS ||--o{ ORDER_ITEMS : "berisi"
+    ORDERS ||--o| PAYMENTS : "pembayaran"
+    ORDER_ITEMS ||--o{ ORDER_ITEM_ADDONS : "memiliki addon"
+
+    ROLES ||--o{ PROFILES : "role (alternatif RBAC)"
+    PERMISSIONS ||--o{ EXTENDED_PERMISSIONS : "diberi"
+
+    %% ============================================================
+    %% Entitas
+    %% ============================================================
+
+    AUTH_USERS {
+        uuid id PK
+        text email
+    }
+
+    MASTER_ROLES {
+        smallint id PK
+        varchar code
+        varchar name
+        text description
+        boolean is_active
+    }
+
+    MASTER_FACILITIES {
+        smallint id PK
+        varchar code
+        varchar name
+        text icon_url
+        text description
+        boolean is_active
+    }
+
+    MASTER_ORGANIZATIONS {
+        uuid id PK
+        varchar name
+        varchar slug
+        text description
+        boolean is_active
+    }
+
+    MASTER_PROPERTIES {
+        uuid id PK
+        uuid master_organizations_id FK
+        varchar name
+        varchar slug
+        text address
+        text contact_wa
+        text description
+        boolean is_active
+    }
+
+    MASTER_BANK_ACCOUNTS {
+        uuid id PK
+        uuid master_organizations_id FK
+        varchar bank_name
+        varchar account_number
+        varchar account_holder
+        boolean is_active
+    }
+
+    MASTER_ADDONS {
+        smallint id PK
+        varchar code
+        varchar name
+        text description
+        text pricing_unit
+        boolean is_active
+    }
+
+    MASTER_CHARGES {
+        smallint id PK
+        varchar name
+        text type
+        numeric value
+        boolean is_active
+    }
+
+    PROFILES {
+        uuid id PK
+        uuid suspended_by FK
+        varchar username
+        smallint role_id FK
+        text avatar_url
+        boolean is_verified
+        boolean is_active
+        timestamptz suspended_at
+        varchar suspended_reason
+    }
+
+    UNITS {
+        uuid id PK
+        uuid master_properties_id FK
+        text name
+        varchar slug
+        varchar unit_type
+        numeric base_price_per_night
+        numeric price_per_hour
+        boolean is_transit_enabled
+        int capacity
+        varchar floor
+        text descriptions
+        text details
+        boolean is_active
+        timestamptz deleted_at
+    }
+
+    GALLERIES {
+        uuid id PK
+        varchar reference_type
+        uuid reference_id
+        text url
+        boolean is_main
+        boolean is_active
+    }
+
+    PROPERTY_ADDONS {
+        uuid id PK
+        uuid master_properties_id FK
+        smallint addon_id FK
+        numeric price
+        boolean is_active
+    }
+
+    FACILITY_ASSIGNMENTS {
+        uuid id PK
+        varchar reference_type
+        uuid reference_id
+        smallint facility_id FK
+        uuid mapped_by FK
+        timestamptz mapped_at
+    }
+
+    PROPERTY_ASSIGNMENTS {
+        uuid id PK
+        uuid user_id FK
+        uuid master_properties_id FK
+        uuid mapped_by FK
+        timestamptz mapped_at
+    }
+
+    ORDERS {
+        uuid id PK
+        uuid user_id FK
+        varchar booking_code
+        varchar guest_name
+        varchar guest_phone
+        text guest_email
+        text status
+        numeric total_amount
+        smallint total_guest
+        timestamptz expires_at
+    }
+
+    ORDER_ITEMS {
+        uuid id PK
+        uuid order_id FK
+        uuid unit_id FK
+        uuid cancelled_by FK
+        uuid checked_in_by FK
+        uuid checked_out_by FK
+        text type_booking
+        smallint guest_amount
+        text status_item
+        timestamptz check_in
+        timestamptz check_out
+        numeric price_at_booking
+        smallint quantity
+        numeric subtotal
+        timestamptz cancelled_at
+        timestamptz checked_in_at
+        timestamptz checked_out_at
+    }
+
+    ORDER_ITEM_ADDONS {
+        uuid id PK
+        uuid order_item_id FK
+        smallint addon_id FK
+        numeric quantity
+        numeric price_at_booking
+        numeric subtotal
+    }
+
+    PAYMENTS {
+        uuid id PK
+        uuid order_id FK
+        uuid verified_by FK
+        numeric amount
+        text proof_url
+        text status
+        varchar destination_bank_name
+        varchar destination_account_number
+        varchar destination_account_holder
+        timestamptz verified_at
+        text notes
+    }
+
+    ACTIVITY_LOGS {
+        uuid id PK
+        text actor_type
+        uuid actor_id
+        text event
+        text entity_type
+        uuid entity_id
+        jsonb metadata
+    }
+
+    ROLES {
+        smallint id PK
+        varchar name
+        text description
+    }
+
+    PERMISSIONS {
+        smallint id PK
+        varchar name
+        text category
+        text description
+    }
+
+    EXTENDED_PERMISSIONS {
+        uuid user_id PK
+        smallint permission_id PK
+        uuid granted_by FK
+        timestamptz granted_at
+        text notes
+    }
