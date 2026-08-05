@@ -82,6 +82,6 @@ E. Pengujian
 
 F. Metodologi Pengembangan
 - Software Development Life Cycle (SDLC)
-- Agile Development
+- Waterfall Development
 - Requirement Gathering
 - System Implementation
