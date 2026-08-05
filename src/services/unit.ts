@@ -1,5 +1,5 @@
 import { createSupabaseServer } from "@/lib/supabase/server";
-import type { Units } from "@/lib/types/main";
+import type { Units } from "@/lib/types/main.types";
 
 export async function getUnits (): Promise<Units[]> {
 

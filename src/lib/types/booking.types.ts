@@ -1,4 +1,4 @@
-import type { PropertyMasterAddons } from "@/lib/types/main";
+import type { PropertyMasterAddons } from "@/lib/types/main.types";
 
 export type BookingType = "inap" | "transit";
 

@@ -10,6 +10,7 @@ import {
   Boxes,
   Users,
   Building2,
+  History,
 } from "lucide-react";
 
 const menuItems = [
@@ -19,6 +20,7 @@ const menuItems = [
   { href: "/admin/laporan", label: "Laporan", icon: FileBarChart },
   { href: "/admin/manage/inventory", label: "Inventaris", icon: Boxes },
   { href: "/admin/manage/users", label: "Pengguna", icon: Users },
+  { href: "/admin/activity-logs", label: "Activity Log", icon: History },
 ];
 
 export function Sidebar() {

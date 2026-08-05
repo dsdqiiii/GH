@@ -1,5 +1,5 @@
 import { createSupabaseServer } from "@/lib/supabase/server";
-import type { MasterProperties } from "@/lib/types/main";
+import type { MasterProperties } from "@/lib/types/main.types";
 
 export async function getProperties (): Promise<MasterProperties[]> {
 
