@@ -87,3 +87,29 @@ export interface BuildBookingPayloadInput {
   form: FormState;
   isLoggedIn: boolean;
 }
+
+export type BookingListItem = {
+  orderId: string;
+  bookingCode: string;
+  guestName: string | null;
+  guestPhone: string | null;
+  guestEmail: string | null;
+  status: string;
+  totalAmount: number;
+  totalGuest: number;
+  createdAt: string;
+  checkIn: string | null;
+  checkOut: string | null;
+  checkedIn?: string | null;
+  checkedOut?: string | null;
+  orderItemStatus?: string | null;
+  unitName: string | null;
+  propertyName: string | null;
+  extraUnitsCount: number;
+}
+
+
+export type GetBookingsParams = {
+  search?: string;
+  limit?: number;
+}

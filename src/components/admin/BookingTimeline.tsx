@@ -1,27 +1,34 @@
 "use client";
 
-import { formatDate, formatDateTime } from "@/utils/formatter.utils";
+import { formatDateTime } from "@/utils/formatter.utils";
 
 interface BookingTimelineProps {
   status: string;
   createdAt: string;
-  checkIn: string | null;
-  checkOut: string | null;
-  checkedIn: string | null | undefined;
-  checkedOut: string | null | undefined;
+  checkedIn?: string | null;
+  checkedOut?: string | null;
+  verifiedAt?: string | null;
+  verifiedBy?: string | null;
 }
 
 export function BookingTimeline({
   status,
   createdAt,
-  checkIn,
-  checkOut,
   checkedIn,
   checkedOut,
+  verifiedAt,
+  verifiedBy,
 }: BookingTimelineProps) {
   // Flag penanda status
   const isCanceled = status === "CANCELED";
-  const isCreated = true; // Karena data booking sudah dibuat
+
+  // Flag Payment Verified / Confirmed
+  const isPaymentVerified =
+    status === "CONFIRMED" ||
+    status === "CHECKED_IN" ||
+    status === "CHECKED_OUT" ||
+    status === "COMPLETED";
+
   const isCheckedIn = Boolean(checkedIn) || status === "CHECKED_IN";
   const isCheckedOut = Boolean(checkedOut) || status === "CHECKED_OUT";
   const isCompleted = status === "COMPLETED";
@@ -52,7 +59,37 @@ export function BookingTimeline({
         </span>
       </div>
 
-      {/* Step 2: Checked In */}
+      {/* Step 2: Payment Verified */}
+      <div className="relative z-10 flex flex-col items-center bg-white px-2 text-center">
+        <div
+          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ring-4 ring-white ${
+            isPaymentVerified
+              ? "bg-emerald-600 text-white"
+              : "bg-neutral-200 text-neutral-500"
+          }`}
+        >
+          {isPaymentVerified ? "✓" : "2"}
+        </div>
+        <span
+          className={`text-xs font-medium mt-1.5 ${
+            isPaymentVerified ? "text-neutral-800" : "text-neutral-400"
+          }`}
+        >
+          Payment Verified
+        </span>
+        <span className="text-[10px] text-neutral-400">
+          {isPaymentVerified ? (
+            <>
+              {verifiedAt ? formatDateTime(verifiedAt) : "Confirmed"}
+              {verifiedBy && <span className="block text-[9px] text-neutral-500">by: {verifiedBy}</span>}
+            </>
+          ) : (
+            "Menunggu"
+          )}
+        </span>
+      </div>
+
+      {/* Step 3: Checked In */}
       <div className="relative z-10 flex flex-col items-center bg-white px-2 text-center">
         <div
           className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ring-4 ring-white ${
@@ -61,7 +98,7 @@ export function BookingTimeline({
               : "bg-neutral-200 text-neutral-500"
           }`}
         >
-          {isCheckedIn || isCheckedOut || isCompleted ? "✓" : "2"}
+          {isCheckedIn || isCheckedOut || isCompleted ? "✓" : "3"}
         </div>
         <span
           className={`text-xs font-medium mt-1.5 ${
@@ -77,7 +114,7 @@ export function BookingTimeline({
         </span>
       </div>
 
-      {/* Step 3: Checked Out */}
+      {/* Step 4: Checked Out */}
       <div className="relative z-10 flex flex-col items-center bg-white px-2 text-center">
         <div
           className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ring-4 ring-white ${
@@ -86,7 +123,7 @@ export function BookingTimeline({
               : "bg-neutral-200 text-neutral-500"
           }`}
         >
-          {isCheckedOut || isCompleted ? "✓" : "3"}
+          {isCheckedOut || isCompleted ? "✓" : "4"}
         </div>
         <span
           className={`text-xs font-medium mt-1.5 ${
@@ -102,7 +139,7 @@ export function BookingTimeline({
         </span>
       </div>
 
-      {/* Step 4: Completed */}
+      {/* Step 5: Completed */}
       <div className="relative z-10 flex flex-col items-center bg-white px-2 text-center">
         <div
           className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ring-4 ring-white ${
@@ -111,7 +148,7 @@ export function BookingTimeline({
               : "bg-neutral-200 text-neutral-500"
           }`}
         >
-          {isCompleted ? "✓" : "4"}
+          {isCompleted ? "✓" : "5"}
         </div>
         <span
           className={`text-xs font-medium mt-1.5 ${

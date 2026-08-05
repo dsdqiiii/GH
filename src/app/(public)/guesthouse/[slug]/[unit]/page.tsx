@@ -34,12 +34,6 @@ export default async function UnitPage({
   const { slug, unit: unitSlug } = await params;
   const sp = await searchParams;
 
-  console.log({
-  slug,
-  unitSlug,
-  searchParams: sp,
-});
-
   const [property, unit] = await Promise.all([
     getPropertyBySlug(slug),
     getUnitBySlug(unitSlug),
@@ -78,8 +72,6 @@ export default async function UnitPage({
     getUnitFacilities(unit.id),
     getPropertyAddons(property.id),
   ]);
-
-  console.log(images, facilities, addons);
 
   const pricePerNight = Number(unit.base_price_per_night ?? 0);
 

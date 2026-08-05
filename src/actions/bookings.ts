@@ -21,8 +21,6 @@ export async function createBooking(
         : payload.duration * 60 * 60 * 1000)
   );
 
-  console.log(payload);
-
   const validation = validateCreateBookingInput({
     unitId: payload.unitId,
     bookingType: payload.bookingType,

@@ -6,7 +6,12 @@ CREATE TABLE IF NOT EXISTS public.activity_logs (
     entity_type text NOT NULL,
     entity_id uuid NOT NULL,
     metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
-    created_at timestamptz NOT NULL DEFAULT now()
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT activity_logs_actor_id_required_check
+    CHECK (
+        (actor_type IN ('user', 'admin') AND actor_id IS NOT NULL)
+        OR (actor_type IN ('anonymous', 'system'))
+    )
 );
 
 CREATE INDEX IF NOT EXISTS idx_activity_logs_entity
