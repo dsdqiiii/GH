@@ -34,8 +34,7 @@ export default function UnitCard({
   // Teruskan seluruh parameter pencarian agar halaman detail
   // dapat melakukan re-validasi ketersediaan menggunakan filter yang sama.
   const query = new URLSearchParams();
-  console.log("UnitCard searchQuery:", searchQuery);
-
+  
   if (searchQuery?.type) query.set("type", searchQuery.type);
   if (searchQuery?.checkin) query.set("checkin", searchQuery.checkin);
   if (searchQuery?.duration) query.set("duration", searchQuery.duration);

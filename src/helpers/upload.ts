@@ -10,7 +10,7 @@
 
 "use client";
 
-import { createSupabaseBrowser } from "@/lib/supabase/browser";
+import { supabaseBrowser } from "@/lib/supabase/browser";
 import {
   PAYMENT_PROOF_BUCKET,
   PAYMENT_PROOF_MAX_SIZE_MB,
@@ -56,12 +56,12 @@ export async function uploadPaymentProof(file: File): Promise<string> {
   const { path, token }: UploadTokenResponse = await tokenRes.json();
 
   // 2. Upload file langsung ke Supabase Storage pakai token sekali-pakai.
-  const supabaseBrowser = createSupabaseBrowser();
-  const { error: uploadError } = await supabaseBrowser.storage
+  
+  const { error } = await supabaseBrowser.storage
     .from(PAYMENT_PROOF_BUCKET)
     .uploadToSignedUrl(path, token, file);
 
-  if (uploadError) {
+  if (error) {
     throw new PaymentProofUploadError(
       "Gagal mengunggah file. Periksa koneksi Anda dan coba lagi."
     );

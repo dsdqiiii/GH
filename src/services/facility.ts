@@ -1,5 +1,5 @@
 import { createSupabaseServer } from "@/lib/supabase/server";
-import type { MasterFacility } from "@/lib/types/main";
+import type { MasterFacility } from "@/lib/types/main.types";
 
 export async function getPropertyFacilities(
   propertyId: string

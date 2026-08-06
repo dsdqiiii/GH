@@ -1,29 +1,6 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
-
-export type BookingListItem = {
-  orderId: string;
-  bookingCode: string;
-  guestName: string | null;
-  guestPhone: string | null;
-  guestEmail: string | null;
-  status: string;
-  totalAmount: number;
-  totalGuest: number;
-  createdAt: string;
-  checkIn: string | null;
-  checkOut: string | null;
-  checkedIn?: string | null;
-  checkedOut?: string | null;
-  orderItemStatus?: string | null;
-  unitName: string | null;
-  propertyName: string | null;
-  extraUnitsCount: number;
-};
-
-export type GetBookingsParams = {
-  search?: string;
-  limit?: number;
-};
+import { createSupabaseServer } from "@/lib/supabase/server"; // 👈 Import ini untuk auth context RPC
+import type { BookingListItem, GetBookingsParams } from "@/lib/types/booking.types";
 
 /**
  * Ambil daftar booking (order) dengan filter pencarian sederhana.
@@ -48,6 +25,7 @@ export async function getBookings({
       total_guest,
       created_at,
       order_items (
+        id,
         check_in,
         check_out,
         checked_in_at,
@@ -81,6 +59,7 @@ export async function getBookings({
 
     return {
       orderId: order.id,
+      orderItemId: firstItem?.id ?? null,
       bookingCode: order.booking_code,
       guestName: order.guest_name,
       guestPhone: order.guest_phone,
@@ -102,7 +81,7 @@ export async function getBookings({
 
 export async function getBookingById(
   orderId: string
-): Promise<BookingListItem | null> {
+): Promise<(BookingListItem & { orderItemId?: string | null }) | null> {
   const supabase = supabaseAdmin;
 
   const { data: order, error } = await supabase
@@ -119,6 +98,7 @@ export async function getBookingById(
       total_guest,
       created_at,
       order_items (
+        id,
         check_in,
         check_out,
         checked_in_at,
@@ -153,6 +133,7 @@ export async function getBookingById(
 
   return {
     orderId: order.id,
+    orderItemId: firstItem?.id ?? null, // 👈 Sertakan order_item.id untuk dikirim ke RPC check_in_order_item
     bookingCode: order.booking_code,
     guestName: order.guest_name,
     guestPhone: order.guest_phone,
@@ -170,4 +151,109 @@ export async function getBookingById(
     propertyName: masterProp?.name ?? null,
     extraUnitsCount: items.length > 1 ? items.length - 1 : 0,
   };
+}
+
+/**
+ * Service untuk melakukan Check-In Order Item via RPC Supabase.
+ * Menggunakan createSupabaseServer() agar konteks auth admin diteruskan ke PostgreSQL.
+ */
+export async function checkInOrderItem(orderItemId: string) {
+  try {
+    const supabase = await createSupabaseServer();
+
+    const { data, error } = await supabase.rpc("check_in_order_item", {
+      p_order_item_id: orderItemId,
+    });
+
+    if (error) {
+      console.error("Error executing RPC check_in_order_item:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  } catch (err: any) {
+    console.error("Unexpected error in checkInOrderItem:", err);
+    return {
+      success: false,
+      error: err?.message || "Terjadi kesalahan sistem saat check-in.",
+    };
+  }
+}
+
+/**
+ * Service untuk melakukan Check-Out Order Item via RPC Supabase.
+ * Menggunakan createSupabaseServer() agar konteks auth admin diteruskan ke PostgreSQL.
+ */
+export async function checkOutOrderItem(orderItemId: string) {
+  try {
+    const supabase = await createSupabaseServer();
+
+    const { data, error } = await supabase.rpc("check_out_order_item", {
+      p_order_item_id: orderItemId,
+    });
+
+    if (error) {
+      console.error("Error executing RPC check_out_order_item:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  } catch (err: any) {
+    console.error("Unexpected error in checkOutOrderItem:", err);
+    return {
+      success: false,
+      error: err?.message || "Terjadi kesalahan sistem saat check-out.",
+    };
+  }
+}
+
+export async function cancelBooking(orderId: string, notes: string) {
+  try {
+    const supabase = await createSupabaseServer();
+
+    const { data, error } = await supabase.rpc("cancel_order", {
+      p_order_id: orderId,
+      p_notes: notes,
+    });
+
+    if (error) {
+      console.error("Error executing RPC cancel_order:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  } catch (err: any) {
+    console.error("Unexpected error in cancelBooking:", err);
+    return {
+      success: false,
+      error: err?.message || "Terjadi kesalahan sistem saat membatalkan booking.",
+    };
+  }
+}
+
+export async function completeBooking(orderId: string, notes?: string) {
+  try {
+    const supabase = await createSupabaseServer();
+    if (!notes || notes.trim() === "") {
+      notes = "Booking selesai oleh admin.";
+    }
+
+    const { data, error } = await supabase.rpc("complete_order", {
+      p_order_id: orderId,
+      p_notes: notes ?? null,
+    });
+
+    if (error) {
+      console.error("Error executing RPC complete_order:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  } catch (err: any) {
+    console.error("Unexpected error in completeBooking:", err);
+    return {
+      success: false,
+      error: err?.message || "Terjadi kesalahan sistem saat menyelesaikan booking.",
+    };
+  }
 }

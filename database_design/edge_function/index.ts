@@ -1,25 +1,25 @@
-// // supabase/functions/send-booking-email/index.ts
-// //
-// // Deploy: supabase functions deploy send-booking-email
-// // Set secret: supabase secrets set RESEND_API_KEY=re_xxxxxxxx
-// //
-// // This is a minimal test version: only sends the booking code by email.
-
 // import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 // Deno.serve(async (req: Request) => {
+//   console.log("1. Function started");
+
 //   try {
-//     const { booking_code, guest_email, guest_name } = await req.json();
+//     console.log("2. Reading body...");
+//     const body = await req.json();
+//     console.log("3. Body:", body);
 
-//     if (!guest_email) {
-//       return new Response(
-//         JSON.stringify({ error: "guest_email is required" }),
-//         { status: 400, headers: { "Content-Type": "application/json" } }
-//       );
-//     }
+//     const { booking_code, guest_email, guest_name } = body;
 
+//     console.log("4. Reading env...");
 //     const resendApiKey = Deno.env.get("RESEND_API_KEY");
-//     const fromAddress = Deno.env.get("RESEND_FROM") ?? "onboarding@resend.dev";
+//     const fromAddress =
+//       Deno.env.get("RESEND_FROM") ??
+//       "noreply-testing-gh@akarsistem.biz.id";
+
+//     console.log("RESEND_API_KEY exists:", !!resendApiKey);
+//     console.log("FROM:", fromAddress);
+
+//     console.log("5. Sending to Resend...");
 
 //     const res = await fetch("https://api.resend.com/emails", {
 //       method: "POST",
@@ -31,32 +31,30 @@
 //         from: fromAddress,
 //         to: guest_email,
 //         subject: `Kode Booking Anda: ${booking_code}`,
-//         html: `
-//           <p>Halo ${guest_name ?? "Tamu"},</p>
-//           <p>Terima kasih telah melakukan booking. Kode booking Anda:</p>
-//           <h2>${booking_code}</h2>
-//           <p>Simpan kode ini untuk keperluan check-in.</p>
-//         `,
+//         html: `<h1>${booking_code}</h1>`,
 //       }),
 //     });
 
-//     const data = await res.json();
+//     console.log("6. Resend status:", res.status);
 
-//     if (!res.ok) {
-//       return new Response(JSON.stringify({ error: data }), {
-//         status: 502,
-//         headers: { "Content-Type": "application/json" },
-//       });
-//     }
+//     const text = await res.text();
+//     console.log("7. Resend body:", text);
 
-//     return new Response(JSON.stringify({ success: true, data }), {
+//     return new Response(text, {
 //       status: 200,
 //       headers: { "Content-Type": "application/json" },
 //     });
 //   } catch (err) {
-//     return new Response(JSON.stringify({ error: String(err) }), {
-//       status: 500,
-//       headers: { "Content-Type": "application/json" },
-//     });
+//     console.error("ERROR:", err);
+
+//     return new Response(
+//       JSON.stringify({
+//         error: err instanceof Error ? err.message : String(err),
+//       }),
+//       {
+//         status: 500,
+//         headers: { "Content-Type": "application/json" },
+//       }
+//     );
 //   }
 // });

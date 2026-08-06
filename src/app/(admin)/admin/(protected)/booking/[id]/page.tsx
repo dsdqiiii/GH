@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBookingById } from "@/services/admin/bookings";
+import { getPaymentByOrderId } from "@/services/admin/payments";
 import { formatCurrency, formatDate, formatDateTime } from "@/utils/formatter.utils";
 import { statusLabel, statusClass } from "@/lib/constants/status";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/core/card";
-import { BookingActionButtons } from "@/components/ui/navigation/BookingActionButtons";
+import { BookingActionButtons } from "@/components/admin/BookingActionButtons";
 import { BookingTimeline } from "@/components/admin/BookingTimeline";
-import { BookingStatusActions } from "@/components/ui/navigation/BookingStatusActions"; // 👈 Import ini
+import { BookingStatusActions } from "@/components/admin/BookingStatusActions";
 
 export const dynamic = "force-dynamic";
 
@@ -20,9 +21,15 @@ export default async function AdminBookingDetailPage({ params }: BookingDetailPa
   const { id } = await params;
   const booking = await getBookingById(id);
 
-  if (!booking) {
+  if (!booking || !booking.orderItemId) {
     notFound();
   }
+
+  // Ambil data pembayaran (jika ada)
+  const payment = await getPaymentByOrderId(booking.orderId);
+
+  // Mengumpulkan array status item (jika ada beberapa item atau item tunggal)
+  const orderItemStatuses = booking.orderItemStatus ? [booking.orderItemStatus] : [];
 
   return (
     <div className="space-y-6 p-6">
@@ -93,7 +100,7 @@ export default async function AdminBookingDetailPage({ params }: BookingDetailPa
                 {booking.orderItemStatus}
               </span>
             </CardHeader>
-            
+
             <CardContent className="space-y-6">
               {/* Info Rencana & Realisasi Check-in/out */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm">
@@ -137,15 +144,16 @@ export default async function AdminBookingDetailPage({ params }: BookingDetailPa
                 <BookingTimeline
                   status={booking.status}
                   createdAt={booking.createdAt}
-                  checkIn={booking.checkIn}
-                  checkOut={booking.checkOut}
                   checkedIn={booking.checkedIn}
                   checkedOut={booking.checkedOut}
+                  verifiedAt={payment?.verified_at ?? null}
+                  verifiedBy={payment?.verified_by ?? null}
                 />
               </div>
 
-              {/* 👈 Tombol Aksi Check-in / Check-out Berdasarkan Status */}
+              {/* Tombol Aksi Check-in / Check-out Berdasarkan Status */}
               <BookingStatusActions
+                orderItemId={booking.orderItemId}
                 bookingId={booking.orderId}
                 status={booking.status}
                 checkedIn={booking.checkedIn}
@@ -213,8 +221,13 @@ export default async function AdminBookingDetailPage({ params }: BookingDetailPa
                 </span>
               </div>
 
-              {/* Komponen Client Interaktif Lain (misal: Cetak Invoice, Batal Booking, dll.) */}
-              <BookingActionButtons />
+              {/* Komponen Client Interaktif (Selesai/Batalkan/Cek Bukti Bayar) */}
+              <BookingActionButtons
+                orderId={booking.orderId}
+                paymentId={payment?.id}
+                status={booking.status}
+                orderItemStatuses={orderItemStatuses}
+              />
             </CardContent>
           </Card>
         </div>

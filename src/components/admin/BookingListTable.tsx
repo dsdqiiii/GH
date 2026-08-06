@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/core/table";
-import type { BookingListItem } from "@/services/admin/bookings";
+import type { BookingListItem } from "@/lib/types/booking.types";
 import { formatDate, formatDateTime } from "@/utils/formatter.utils";
 import { statusLabel, statusClass } from "@/lib/constants/status";
 

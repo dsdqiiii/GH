@@ -1,6 +1,6 @@
 // services/availablility.ts
 import { createSupabaseServer } from "@/lib/supabase/server";
-import type { AvailableUnits } from "@/lib/types/unit"; // sesuaikan path sesuai lokasi kalian taruh
+import type { AvailableUnits } from "@/lib/types/unit.types"; // sesuaikan path sesuai lokasi kalian taruh
 
 export type TypeBooking = "inap" | "transit";
 

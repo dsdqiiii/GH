@@ -1,4 +1,4 @@
-import type { PropertyMasterAddons } from "@/lib/types/main";
+import type { PropertyMasterAddons } from "@/lib/types/main.types";
 import type {
   FormState,
   FormErrors,
