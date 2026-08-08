@@ -43,6 +43,10 @@ export async function updateUnit(
 ): Promise<UpdateUnitResult> {
   const supabase = await createSupabaseServer();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const { data, error } = await supabase
     .from("units")
     .update({
@@ -54,6 +58,12 @@ export async function updateUnit(
     .single<Units>();
 
   if (error || !data) {
+    console.error("[updateUnit] supabase error:", {
+      code: error?.code,
+      message: error?.message,
+      details: error?.details,
+      hint: error?.hint,
+    });
     return { data: null, error: error?.message ?? "Gagal memperbarui unit" };
   }
 

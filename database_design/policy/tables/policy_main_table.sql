@@ -18,6 +18,8 @@ FOR SELECT
 TO public
 USING (
   is_active = true
+  or is_admin()
+  or is_assigned_to_property(master_properties_id)
 );
 
 DROP POLICY IF EXISTS "public can read active galleries" ON galleries;
@@ -36,4 +38,31 @@ FOR SELECT
 TO public
 USING (
   is_active = true
+);
+
+-- =========================
+-- INSERT POLICY
+-- =========================
+
+drop policy if exists "admin or assigned staff can insert unit" on units;
+create policy "admin or assigned staff can insert unit"
+on units
+for insert
+with check (
+  is_admin() or is_assigned_to_property(master_properties_id)
+);
+
+-- =========================
+-- UPDATE POLICY
+-- =========================
+
+drop policy if exists "admin or assigned staff can update unit" on units;
+create policy "admin or assigned staff can update unit"
+on units
+for update
+using (
+  is_admin() or is_assigned_to_property(master_properties_id)
+)
+with check (
+  is_admin() or is_assigned_to_property(master_properties_id)
 );
