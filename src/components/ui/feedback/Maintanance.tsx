@@ -1,4 +1,4 @@
-// @bn/ui/src/components/Maintenance.tsx
+// @components/ui/src/components/Maintenance.tsx
 
 import { Wrench } from "lucide-react";
 
