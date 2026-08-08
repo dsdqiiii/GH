@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase/server";
-import { Sidebar } from "@/components/admin/Sidebar";
-import { Header } from "@/components/admin/Header";
+import { Sidebar } from "@/components/admin/layout/Sidebar";
+import { Header } from "@/components/admin/layout/Header";
 
 export default async function ProtectedAdminLayout({
   children,

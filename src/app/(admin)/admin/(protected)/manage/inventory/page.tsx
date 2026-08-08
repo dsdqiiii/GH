@@ -1,4 +1,4 @@
-import { PropertyInventoryList } from "@/components/admin/PropertyInventoryList";
+import { PropertyInventoryList } from "@/components/admin/property/PropertyInventoryList";
 import { getAssignedProperties } from "@/services/admin/property-assignment";
 
 export const dynamic = "force-dynamic";

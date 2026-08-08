@@ -1,5 +1,5 @@
-import { BookingListTables } from "@/components/admin/BookingListTable";
-import { BookingSearch } from "@/components/admin/BookingSearch";
+import { BookingListTables } from "@/components/admin/booking/BookingListTable";
+import { BookingSearch } from "@/components/admin/booking/BookingSearch";
 import { getBookings } from "@/services/admin/bookings";
 
 export const dynamic = "force-dynamic";

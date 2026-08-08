@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { UnitListTable } from "@/components/admin/UnitListTable";
+import { UnitListTable } from "@/components/admin/unit/UnitListTable";
 import { Button } from "@/components/ui/core/button";
 import { getPropertyBySlug } from "@/services/property";
 import { getUnitsByPropertyIdForAdmin } from "@/services/admin/units";

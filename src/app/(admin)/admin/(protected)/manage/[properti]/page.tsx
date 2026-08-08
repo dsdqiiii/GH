@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
-import { OrganizationInfoCard } from "@/components/admin/OrganizationInfoCard";
-import { PropertyEditForm } from "@/components/admin/PropertyEditForm";
-import { BankAccountsCard } from "@/components/admin/BankAccountsCard";
-import { PropertyFacilitiesCard } from "@/components/admin/PropertyFacilitiesCard";
-import { PropertyGalleriesCard } from "@/components/admin/PropertyGalleriesCard";
+import { OrganizationInfoCard } from "@/components/admin/property/OrganizationInfoCard";
+import { PropertyEditForm } from "@/components/admin/property/PropertyEditForm";
+import { BankAccountsCard } from "@/components/admin/property/BankAccountsCard";
+import { PropertyFacilitiesCard } from "@/components/admin/property/PropertyFacilitiesCard";
+import { PropertyGalleriesCard } from "@/components/admin/property/PropertyGalleriesCard";
 import { Button } from "@/components/ui/core/button";
 import { getPropertyDetailBySlug } from "@/services/admin/property-detail";
 

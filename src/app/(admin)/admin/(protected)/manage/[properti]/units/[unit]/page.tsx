@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { UnitPropertyInfoCard } from "@/components/admin/UnitPropertyInfoCard";
-import { UnitEditForm } from "@/components/admin/UnitEditForm";
-import { PropertyFacilitiesCard } from "@/components/admin/PropertyFacilitiesCard";
-import { PropertyGalleriesCard } from "@/components/admin/PropertyGalleriesCard";
+import { UnitPropertyInfoCard } from "@/components/admin/unit/UnitPropertyInfoCard";
+import { UnitEditForm } from "@/components/admin/unit/UnitEditForm";
+import { PropertyFacilitiesCard } from "@/components/admin/property/PropertyFacilitiesCard";
+import { PropertyGalleriesCard } from "@/components/admin/property/PropertyGalleriesCard";
 import { Button } from "@/components/ui/core/button";
 import { getUnitDetailBySlug } from "@/services/admin/unit-detail";
 
