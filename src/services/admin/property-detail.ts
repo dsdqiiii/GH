@@ -14,7 +14,7 @@ import type {
  * - organisasi induk (master_organizations)
  * - bank account milik organisasi yang sama
  * - facility yang di-assign ke property ini (reference_type = 'property')
- * - galleries milik property ini (reference_type = 'property')
+ * - galleries milik property ini (reference_type = 'property') dengan url bertipe Supabase Public URL
  *
  * Mengembalikan null kalau property tidak ditemukan.
  */
@@ -57,7 +57,21 @@ export async function getPropertyDetailBySlug(
 
   const organization = organizationRes.data ?? null;
   const bankAccounts: MasterBankAccounts[] = bankAccountsRes.data ?? [];
-  const galleries: Galleries[] = galleriesRes.data ?? [];
+  const rawGalleries: Galleries[] = galleriesRes.data ?? [];
+
+  // Map path path/to/file.jpg menjadi public URL penuh Supabase Storage
+  const galleries: Galleries[] = rawGalleries.map((item) => {
+    if (!item.url) return item;
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("GH").getPublicUrl(item.url);
+
+    return {
+      ...item,
+      url: publicUrl,
+    };
+  });
 
   return {
     property,

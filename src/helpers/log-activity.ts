@@ -1,46 +1,60 @@
 import { createSupabaseServer } from "@/lib/supabase/server";
 import type { Json } from "@/lib/types/supabase";
 
-type ActorType = "user" | "system" | "guest";
+export type ActorType = "anonymous" | "user" | "admin" | "system";
 
-/**
- * Memanggil RPC log_activity untuk mencatat aktivitas admin/staff.
- * Dipanggil dari actions setelah operasi write (update/toggle/dll) sukses.
- *
- * Gagal log TIDAK boleh menggagalkan action utama — di-swallow & di-console.error
- * saja, supaya UX tidak terganggu hanya karena audit log gagal tercatat.
- */
-export async function logActivity(params: {
+interface LogActivityParams {
   actorType?: ActorType;
+  actorId?: string | null;
   event: string;
   entityType: string;
-  entityId: string;
+  entityId?: string | null;
   metadata?: Json;
-}) {
-  const { actorType = "user", event, entityType, entityId, metadata = {} } = params;
+}
+
+/**
+ * Memanggil RPC log_activity untuk mencatat aktivitas.
+ * Jika actorId tidak dikirim dan actorType bukan 'anonymous'/'system',
+ * fungsi akan mencoba mengambil user.id dari session saat ini.
+ */
+export async function logActivity(params: LogActivityParams) {
+  const {
+    actorType = "admin",
+    actorId,
+    event,
+    entityType,
+    entityId = null,
+    metadata = {},
+  } = params;
 
   try {
     const supabase = await createSupabaseServer();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    let finalActorId = actorId;
 
-    if (!user) {
-      console.error("logActivity skipped: no authenticated user");
-      return;
+    // Jika actorId tidak disediakan & bukan aksi anonim, ambil dari sesi aktif
+    if (!finalActorId && actorType !== "anonymous" && actorType !== "system") {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        console.error("logActivity skipped: no authenticated user found");
+        return;
+      }
+      finalActorId = user.id;
     }
 
     const { error } = await supabase.rpc("log_activity", {
       p_actor_type: actorType,
-      p_actor_id: user.id,
+      p_actor_id: finalActorId ?? undefined,
       p_event: event,
       p_entity_type: entityType,
-      p_entity_id: entityId,
+      p_entity_id: entityId ?? undefined,
       p_metadata: metadata,
     });
 
     if (error) {
-      console.error("logActivity failed:", error.message);
+      console.error("logActivity failed:", error.message, error.details);
     }
   } catch (err) {
     console.error("logActivity threw:", err);

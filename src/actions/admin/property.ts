@@ -5,6 +5,7 @@ import {
   togglePropertyActive,
   updateProperty,
 } from "@/services/admin/properties";
+import { logActivity } from "@/helpers/log-activity";
 import type { MasterPropertiesUpdate } from "@/lib/types/main.types";
 
 export async function updatePropertyAction(
@@ -17,6 +18,16 @@ export async function updatePropertyAction(
   if (res.error || !res.data) {
     return res;
   }
+
+  await logActivity({
+    event: "property.updated",
+    entityType: "property",
+    entityId: propertyId,
+    metadata: {
+      oldSlug: slug,
+      newSlug: res.data.slug,
+    },
+  });
 
   revalidatePath("/admin/manage/inventory");
   // slug bisa berubah setelah update; revalidate slug lama & baru
@@ -36,6 +47,13 @@ export async function togglePropertyActiveAction(
   const res = await togglePropertyActive(propertyId, isActive);
 
   if (!res.error) {
+    await logActivity({
+      event: isActive ? "property.activated" : "property.deactivated",
+      entityType: "property",
+      entityId: propertyId,
+      metadata: { propertySlug: slug },
+    });
+
     revalidatePath("/admin/manage/inventory");
     revalidatePath(`/admin/manage/${slug}`);
   }

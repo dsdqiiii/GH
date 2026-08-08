@@ -44,7 +44,7 @@ export type Database = {
           actor_id: string | null
           actor_type: string
           created_at: string
-          entity_id: string
+          entity_id: string | null
           entity_type: string
           event: string
           id: string
@@ -54,7 +54,7 @@ export type Database = {
           actor_id?: string | null
           actor_type: string
           created_at?: string
-          entity_id: string
+          entity_id?: string | null
           entity_type: string
           event: string
           id?: string
@@ -64,7 +64,7 @@ export type Database = {
           actor_id?: string | null
           actor_type?: string
           created_at?: string
-          entity_id?: string
+          entity_id?: string | null
           entity_type?: string
           event?: string
           id?: string
@@ -1044,18 +1044,23 @@ export type Database = {
           slug: string
         }[]
       }
+      get_unit_property_id: { Args: { p_unit_id: string }; Returns: string }
       has_extended_permission: {
         Args: { p_permission_name: string }
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      is_assigned_to_property: {
+        Args: { p_property_id: string }
+        Returns: boolean
+      }
       log_activity: {
         Args: {
-          p_actor_id: string
+          p_actor_id?: string
           p_actor_type: string
-          p_entity_id: string
-          p_entity_type: string
-          p_event: string
+          p_entity_id?: string
+          p_entity_type?: string
+          p_event?: string
           p_metadata?: Json
         }
         Returns: undefined

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { loginSchema, type LoginFormState } from "@/lib/validators/auth";
+import { logActivity } from "@/helpers/log-activity";
 
 export async function loginAction(
   _prevState: LoginFormState,
@@ -24,39 +25,57 @@ export async function loginAction(
   }
 
   const supabase = await createSupabaseServer();
+  const headerList = await headers();
+  const userAgent = headerList.get("user-agent") || "unknown";
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
     password: parsed.data.password,
   });
 
-  if (error) {
+  // 1. Penanganan Login GAGAL
+  if (error || !data.user) {
+    await logActivity({
+      actorType: "anonymous",
+      actorId: null, // Menerima NULL
+      event: "LOGIN_FAILED",
+      entityType: "auth",
+      entityId: null, // Boleh NULL sesuai constraint DB
+      metadata: {
+        email: parsed.data.email,
+        reason: error?.message ?? "User tidak ditemukan",
+        user_agent: userAgent,
+      },
+    });
+
     return {
       success: false,
       message:
-        error.code === "invalid_credentials"
+        error?.code === "invalid_credentials"
           ? "Email atau password salah"
           : "Gagal masuk, silakan coba lagi",
     };
   }
 
-  // Catat log login via RPC
-  if (data.user) {
-    const headerList = await headers();
-    const userAgent = headerList.get("user-agent") || "unknown";
+  // 2. Penanganan Login BERHASIL
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role_id")
+    .eq("id", data.user.id)
+    .single();
 
-    await supabase.rpc("log_activity", {
-      p_actor_type: "user",
-      p_actor_id: data.user.id,
-      p_event: "LOGIN",
-      p_entity_type: "auth",
-      p_entity_id: data.user.id,
-      p_metadata: {
-        email: data.user.email,
-        user_agent: userAgent,
-      },
-    });
-  }
+  await logActivity({
+    actorType: "admin",
+    actorId: data.user.id,
+    event: "LOGIN",
+    entityType: "auth",
+    entityId: data.user.id,
+    metadata: {
+      email: data.user.email,
+      role_id: profile?.role_id ?? null,
+      user_agent: userAgent,
+    },
+  });
 
   redirect("/admin/dashboard");
 }
@@ -64,23 +83,29 @@ export async function loginAction(
 export async function logoutAction() {
   const supabase = await createSupabaseServer();
 
-  // Ambil user sebelum signout untuk pencatatan log
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role_id")
+      .eq("id", user.id)
+      .single();
+
     const headerList = await headers();
     const userAgent = headerList.get("user-agent") || "unknown";
 
-    await supabase.rpc("log_activity", {
-      p_actor_type: "user",
-      p_actor_id: user.id,
-      p_event: "LOGOUT",
-      p_entity_type: "auth",
-      p_entity_id: user.id,
-      p_metadata: {
+    await logActivity({
+      actorType: "admin",
+      actorId: user.id,
+      event: "LOGOUT",
+      entityType: "auth",
+      entityId: user.id,
+      metadata: {
         email: user.email,
+        role_id: profile?.role_id ?? null,
         user_agent: userAgent,
       },
     });

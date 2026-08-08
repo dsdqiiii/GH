@@ -89,13 +89,13 @@ export function ActivityLogTable({ logs }: { logs: ActivityLogItem[] }) {
               <TableCell className="px-4 py-3 text-neutral-700">
                 <div className="font-medium text-neutral-900">{log.entityType}</div>
                 <div className="font-mono text-xs text-neutral-400">
-                  ID: {log.entityId.slice(0, 8)}...
+                  {log.entityId ? `ID: ${log.entityId.slice(0, 8)}...` : "-"}
                 </div>
               </TableCell>
 
               {/* Column Metadata */}
               <TableCell className="px-4 py-3 text-neutral-600">
-                {Object.keys(log.metadata).length > 0 ? (
+                {log.metadata && Object.keys(log.metadata).length > 0 ? (
                   <pre className="max-w-xs truncate font-mono text-xs text-neutral-500">
                     {JSON.stringify(log.metadata)}
                   </pre>

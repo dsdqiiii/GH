@@ -1,9 +1,9 @@
 CREATE OR REPLACE FUNCTION log_activity(
   p_actor_type text,
-  p_actor_id uuid,
-  p_event text,
-  p_entity_type text,
-  p_entity_id uuid,
+  p_actor_id uuid DEFAULT NULL,
+  p_event text DEFAULT '',
+  p_entity_type text DEFAULT '',
+  p_entity_id uuid DEFAULT NULL,
   p_metadata jsonb DEFAULT '{}'::jsonb
 ) RETURNS void AS $$
 BEGIN
@@ -24,3 +24,6 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Berikan akses eksekusi ke anon dan authenticated role
+GRANT EXECUTE ON FUNCTION log_activity TO anon, authenticated, service_role;
