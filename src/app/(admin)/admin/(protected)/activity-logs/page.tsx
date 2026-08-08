@@ -1,5 +1,5 @@
-import { ActivityLogTable } from "@/components/admin/ActivityLogTable";
-import { ActivityLogSearch } from "@/components/admin/ActivityLogSearch";
+import { ActivityLogTable } from "@/components/admin/activity/ActivityLogTable";
+import { ActivityLogSearch } from "@/components/admin/activity/ActivityLogSearch";
 import { getActivityLogs } from "@/services/admin/activity-log";
 
 export const dynamic = "force-dynamic";

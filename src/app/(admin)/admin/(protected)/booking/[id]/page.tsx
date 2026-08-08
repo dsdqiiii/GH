@@ -5,9 +5,9 @@ import { getPaymentByOrderId } from "@/services/admin/payments";
 import { formatCurrency, formatDate, formatDateTime } from "@/utils/formatter.utils";
 import { statusLabel, statusClass } from "@/lib/constants/status";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/core/card";
-import { BookingActionButtons } from "@/components/admin/BookingActionButtons";
-import { BookingTimeline } from "@/components/admin/BookingTimeline";
-import { BookingStatusActions } from "@/components/admin/BookingStatusActions";
+import { BookingActionButtons } from "@/components/admin/booking/BookingActionButtons";
+import { BookingTimeline } from "@/components/admin/booking/BookingTimeline";
+import { BookingStatusActions } from "@/components/admin/booking/BookingStatusActions";
 
 export const dynamic = "force-dynamic";
 

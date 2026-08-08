@@ -5,7 +5,7 @@ import {
   getPaymentDetailById,
   getPaymentProofSignedUrl,
 } from "@/services/admin/payments";
-import PaymentActions from "@/components/admin/PaymentAction";
+import PaymentActions from "@/components/admin/payment/PaymentAction";
 import {
   Card,
   CardHeader,

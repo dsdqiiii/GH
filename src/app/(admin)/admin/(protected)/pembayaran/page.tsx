@@ -1,5 +1,5 @@
-import { PaymentListTable } from "@/components/admin/PaymentListTable"; // Sesuaikan path komponen Anda
-import { PaymentSearch } from "@/components/admin/PaymentSearch"; // Sesuaikan path komponen Anda
+import { PaymentListTable } from "@/components/admin/payment/PaymentListTable"; // Sesuaikan path komponen Anda
+import { PaymentSearch } from "@/components/admin/payment/PaymentSearch"; // Sesuaikan path komponen Anda
 import { getPaymentSummaries, getPaymentProofSignedUrl } from "@/services/admin/payments";
 
 export const dynamic = "force-dynamic";

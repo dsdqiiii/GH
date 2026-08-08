@@ -1049,6 +1049,17 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      log_activity: {
+        Args: {
+          p_actor_id: string
+          p_actor_type: string
+          p_entity_id: string
+          p_entity_type: string
+          p_event: string
+          p_metadata?: Json
+        }
+        Returns: undefined
+      }
       reject_payment: {
         Args: { p_notes?: string; p_payment_id: string }
         Returns: {
