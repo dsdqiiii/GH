@@ -33,14 +33,14 @@ export async function loginAction(
     password: parsed.data.password,
   });
 
-  // 1. Penanganan Login GAGAL
+  // 1. Penanganan Login GAGAL (auth.login_failed)
   if (error || !data.user) {
     await logActivity({
       actorType: "anonymous",
-      actorId: null, // Menerima NULL
-      event: "LOGIN_FAILED",
+      actorId: null,
+      event: "auth.login_failed",
       entityType: "auth",
-      entityId: null, // Boleh NULL sesuai constraint DB
+      entityId: null,
       metadata: {
         email: parsed.data.email,
         reason: error?.message ?? "User tidak ditemukan",
@@ -57,7 +57,7 @@ export async function loginAction(
     };
   }
 
-  // 2. Penanganan Login BERHASIL
+  // 2. Penanganan Login BERHASIL (auth.login)
   const { data: profile } = await supabase
     .from("profiles")
     .select("role_id")
@@ -67,7 +67,7 @@ export async function loginAction(
   await logActivity({
     actorType: "admin",
     actorId: data.user.id,
-    event: "LOGIN",
+    event: "auth.login",
     entityType: "auth",
     entityId: data.user.id,
     metadata: {
@@ -97,10 +97,11 @@ export async function logoutAction() {
     const headerList = await headers();
     const userAgent = headerList.get("user-agent") || "unknown";
 
+    // 3. Penanganan LOGOUT (auth.logout)
     await logActivity({
       actorType: "admin",
       actorId: user.id,
-      event: "LOGOUT",
+      event: "auth.logout",
       entityType: "auth",
       entityId: user.id,
       metadata: {

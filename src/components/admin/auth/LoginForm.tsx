@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { loginAction } from "@/actions/auth";
+import { loginAction } from "@/actions/admin/auth";
 import type { LoginFormState } from "@/lib/validators/auth";
 
 const initialState: LoginFormState = { success: false };

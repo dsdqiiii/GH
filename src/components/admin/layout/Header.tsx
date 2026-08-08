@@ -1,5 +1,5 @@
 import { LogOut } from "lucide-react";
-import { logoutAction } from "@/actions/auth";
+import { logoutAction } from "@/actions/admin/auth";
 
 export function Header() {
   return (
