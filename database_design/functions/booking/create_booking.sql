@@ -130,7 +130,7 @@ begin
 
     -- 7.3. cek durasi minmax 
     if p_duration < 1 or p_duration > 10 then
-      raise exception 'duration (nights) must be >= 1 or must be <= 100'
+      raise exception 'duration (nights) must be >= 1 or must be <= 10'
         using errcode = 'P0001';
     end if;
 
