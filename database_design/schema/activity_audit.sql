@@ -4,13 +4,15 @@ CREATE TABLE IF NOT EXISTS public.activity_logs (
     actor_id uuid NULL,
     event text NOT NULL,
     entity_type text NOT NULL,
-    entity_id uuid NOT NULL,
+    entity_id uuid NULL, -- Mengizinkan NULL untuk aksi anonim/auth gagal
     metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
     created_at timestamptz NOT NULL DEFAULT now(),
+    
     CONSTRAINT activity_logs_actor_id_required_check
     CHECK (
-        (actor_type IN ('user', 'admin') AND actor_id IS NOT NULL)
-        OR (actor_type IN ('anonymous', 'system'))
+        (actor_type IN ('user', 'admin') AND actor_id IS NOT NULL AND entity_id IS NOT NULL)
+        OR 
+        (actor_type IN ('anonymous', 'system'))
     )
 );
 

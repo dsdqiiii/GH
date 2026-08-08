@@ -1,8 +1,9 @@
-export default function AdminPage() {
+import {Maintenance} from "@/components/ui/feedback/Maintanance";
+
+export default function LaporanPage() {
   return (
     <main>
-      <h1>Admin</h1>
-      <p>Ini halaman /admin</p>
+      <Maintenance />
     </main>
   )
 }

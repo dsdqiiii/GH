@@ -49,7 +49,7 @@ create policy "admin or assigned staff can insert unit"
 on units
 for insert
 with check (
-  is_admin() or is_assigned_to_property(master_properties_id)
+  is_admin()
 );
 
 -- =========================

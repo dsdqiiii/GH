@@ -13,18 +13,33 @@ import {
   History,
 } from "lucide-react";
 
+interface SidebarProps {
+  roleId?: number;
+}
+
 const menuItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/booking", label: "Booking", icon: CalendarCheck },
   { href: "/admin/pembayaran", label: "Pembayaran", icon: Wallet },
   { href: "/admin/laporan", label: "Laporan", icon: FileBarChart },
   { href: "/admin/manage/inventory", label: "Inventaris", icon: Boxes },
-  { href: "/admin/manage/users", label: "Pengguna", icon: Users },
+  { 
+    href: "/admin/manage/users", 
+    label: "Pengguna", 
+    icon: Users,
+    allowedRoles: [1], // Hanya Role 1 (All) yang bisa melihat ini
+  },
   { href: "/admin/activity-logs", label: "Activity Log", icon: History },
 ];
 
-export function Sidebar() {
+export function Sidebar({ roleId = 2 }: SidebarProps) {
   const pathname = usePathname();
+
+  // Filter menu berdasarkan roleId yang dikirim
+  const filteredMenuItems = menuItems.filter((item) => {
+    if (!item.allowedRoles) return true;
+    return item.allowedRoles.includes(roleId);
+  });
 
   return (
     <aside className="hidden w-64 shrink-0 flex-col justify-between bg-forest text-sand md:flex">
@@ -42,7 +57,7 @@ export function Sidebar() {
         </div>
 
         <nav className="space-y-1 p-4">
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname.startsWith(item.href);
 

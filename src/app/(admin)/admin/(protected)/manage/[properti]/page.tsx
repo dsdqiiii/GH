@@ -23,6 +23,7 @@ export default async function PropertiPage({
   }
 
   const { property, organization, bankAccounts, facilities, galleries } = detail;
+  console.log(galleries);
 
   return (
     <div className="space-y-6 p-6">

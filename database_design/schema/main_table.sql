@@ -5,7 +5,7 @@
 CREATE TABLE IF NOT EXISTS profiles (
     id uuid primary key references auth.users(id) on delete cascade,
     username varchar(255) default null,
-    role_id smallint not null references master_roles(id) on delete restrict, -- FIXED: Mengunci ke ID, bukan Code teks
+    role_id smallint not null references roles(id) on delete restrict, -- FIXED: Mengunci ke ID, bukan Code teks
     avatar_url text,
     is_verified boolean not null default false,
     is_active boolean not null default true,
